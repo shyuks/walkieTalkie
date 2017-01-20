@@ -1,0 +1,26 @@
+{
+  "name": "greenField",
+  "description": "Establishing connections by interests in your location",
+  "main": "server.js",
+  "authors": [
+    "Greg Hasenauer",
+    "Rakan Nesheiwat",
+    "Sean Hong"
+  ],
+  "license": "UNLICENSED",
+  "keywords": [
+    "api"
+  ],
+  "homepage": "https://www.github.com/essxiv",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.1.1"
+  }
+}
