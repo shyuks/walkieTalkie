@@ -26,11 +26,21 @@ class App extends React.Component {
    axios.get('/checkSession')
    .then(res => {
      if (res.data.id) {
-      this.setState({
-        userId : res.data.id,
-        mounted : true,
-        login_signup_view : false
-      })
+      if (res.data.roomId) {
+        this.setState({
+          userId : res.data.id,
+          roomId : res.data.roomId,
+          mounted : true,
+          login_signup_view : false,
+          chat_view : true
+        })
+      } else {
+        this.setState({
+          userId : res.data.id,
+          mounted : true,
+          login_signup_view : false
+        })
+      }
      } else {
        this.setState({
          mounted : true

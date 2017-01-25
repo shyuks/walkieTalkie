@@ -1,9 +1,9 @@
-var db = require('./config.js')
-var Users = require('./schema/User.js')
-var ActiveUsers = require('./schema/ActiveUsers.js');
-var sequelize = require('sequelize')
-var util = require('./util.js')
-var Promise = require('bluebird')
+let db = require('./config.js')
+let Users = require('./schema/User.js')
+let ActiveUsers = require('./schema/ActiveUsers.js');
+let sequelize = require('sequelize')
+let util = require('./util.js')
+let Promise = require('bluebird')
 
 module.exports.createUser = (nI, cb) => {
   db.query('select id from Users where email = ?',
@@ -165,13 +165,17 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
           cb(error);
         })
      } else {
-       var roomsIds = [];
+       let roomsIds = [];
        res1.forEach(id => {roomsIds.push(id['roomId'])});
        db.query('select latitude, longitude, roomId from ActiveUsers where roomId in (?)',
         {replacements : [roomsIds], type : sequelize.QueryTypes.SELECT})
         .then(res4 => {
-          for(var i = 0; i <res4.length; i++){
-            var temp = distance(lat, long, res4[i]['latitude'], res4[i]['longitude']);
+
+          let currDistance = 10000;
+          let shortestPoint;
+
+          for(let i = 0; i <res4.length; i++){
+            let temp = util.distance(lat, long, res4[i]['latitude'], res4[i]['longitude']);
             if(temp < currDistance) {
               currDistance = temp;
               shortestPoint = res4[i]['roomId'];

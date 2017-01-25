@@ -21570,11 +21570,21 @@
 
 	      _axios2.default.get('/checkSession').then(function (res) {
 	        if (res.data.id) {
-	          _this2.setState({
-	            userId: res.data.id,
-	            mounted: true,
-	            login_signup_view: false
-	          });
+	          if (res.data.roomId) {
+	            _this2.setState({
+	              userId: res.data.id,
+	              roomId: res.data.roomId,
+	              mounted: true,
+	              login_signup_view: false,
+	              chat_view: true
+	            });
+	          } else {
+	            _this2.setState({
+	              userId: res.data.id,
+	              mounted: true,
+	              login_signup_view: false
+	            });
+	          }
 	        } else {
 	          _this2.setState({
 	            mounted: true
@@ -42331,7 +42341,10 @@
 	  function Chatroom(props) {
 	    _classCallCheck(this, Chatroom);
 
-	    return _possibleConstructorReturn(this, (Chatroom.__proto__ || Object.getPrototypeOf(Chatroom)).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (Chatroom.__proto__ || Object.getPrototypeOf(Chatroom)).call(this, props));
+
+	    _this.state = {};
+	    return _this;
 	  }
 
 	  _createClass(Chatroom, [{

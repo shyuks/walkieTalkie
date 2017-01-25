@@ -28,8 +28,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/checkSession', (req, res) => {
-  res.status(200).send({id : req.session.userId});
+  res.status(200).send({id : req.session.userId, roomId : req.session.roomId});
 });
+
 
 app.get('/findGlobalRoom', (req, res) => {
   dataHandler.createSession(req.session.userId, req.query.latitude, req.query.longitude)
@@ -38,6 +39,7 @@ app.get('/findGlobalRoom', (req, res) => {
       if (error) {
         res.status(500).send(error);
       } else {
+        req.session.roomId = result;
         res.status(200).json({'host' : host, 'roomId' : result});
       } 
     })
@@ -54,6 +56,7 @@ app.get('/findLocalRoom', (req, res) => {
       if (error) {
         res.status(500).send(error);
       } else {
+        req.session.roomId = result;
         res.status(200).json({'host' : host, 'roomId' : result, 'distance' : distance});
       }
     })
@@ -101,6 +104,7 @@ app.post('/exitChat', (req, res) => {
     if (error) {
       res.status(500).send(error);
     } else {
+      req.session.roomId = null;
       res.status(200).send('Exit Successfull')
     }
   })
