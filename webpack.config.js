@@ -13,6 +13,7 @@ var config = {
         path: bin_dir,
         filename: 'bundle.js'
     },
+    watch : true,
     module: {
         loaders: [{
             test: /.js?$/,
