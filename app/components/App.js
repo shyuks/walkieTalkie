@@ -72,18 +72,18 @@ class App extends React.Component {
 
  handleChatExit(){
    var self = this;
-   //if (this.state.roomId) {
-   axios.post('/exitChat', {id : this.state.userId})
-   .then(res => {
-     self.setState({
-       chat_view : false,
-       roomId : null
-     })
-   })
-   .catch(err => {
-     console.log(err);
-   })
-  // }
+   if (this.state.roomId) {
+    axios.post('/exitChat', {id : this.state.userId})
+    .then(res => {
+      self.setState({
+        chat_view : false,
+        roomId : null
+      })
+    })
+    .catch(err => {
+      console.log(err);
+    })
+   }
  }
 
   render() {

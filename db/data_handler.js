@@ -80,3 +80,91 @@ module.exports.exitRoom = (inputId, cb) => {
     cb(error);
   })
 }
+
+module.exports.findGlobalRoom = (inputId, cb) => {
+    db.query('select roomId from ActiveUsers where roomId != 0 group by roomId having count(roomId) < 10', 
+    {type : sequelize.QueryTypes.SELECT})
+    .then(res1 => {
+      if (res1.length === 0) {
+        db.query('select max(roomId) from ActiveUsers',
+        {type : sequelize.QueryTypes.SELECT})
+        .then(res2 => {
+          db.query('update ActiveUsers set roomId = ? where userId = ?',
+          {replacements : [res2[0]['max(roomId)']+1, inputId], type : sequelize.QueryTypes.UPDATE})
+          .then(res3 => {
+            cb(false, res2[0]['max(roomId)']+1, true);
+          })
+          .catch(error => {
+            cb(error);
+          })
+        })
+        .catch(error => {
+          cb(error);
+        })
+      } else {
+        db.query('update ActiveUsers set roomId = ? where userId = ?',
+        {replacements : [ res1[0].roomId, inputId], type : sequelize.QueryTypes.UPDATE})
+        .then(res4 => {
+          cb(false, res1[0].roomId, false)
+        })
+        .catch(error => {
+          cb(error);
+        })
+      }
+     })
+    .catch(err => {
+      console.log('error', err);
+    })
+}
+
+module.exports.findLocalRoom = (user, lat, long, cb) => {
+  db.query('select roomId from ActiveUsers where roomId != 0 group by roomId having count(roomId) < 10',
+   {type : sequelize.QueryTypes.SELECT})
+   .then(res1 => {
+     if (res1.length === 0) {
+        db.query('select max(roomId) from ActiveUsers',
+        {type : sequelize.QueryTypes.SELECT})
+        .then(res2 => {
+          db.query('update ActiveUsers set roomId = ? where userId = ?',
+          {replacements : [res2[0]['max(roomId)']+1, user], type : sequelize.QueryTypes.UPDATE})
+          .then(res3 => {
+            cb(false, res2[0]['max(roomId)']+1, true);
+          })
+          .catch(error => {
+            cb(error);
+          })
+        })
+        .catch(error => {
+          cb(error);
+        })
+     } else {
+       var roomsIds = [];
+       res1.forEach(id => {roomsIds.push(id['roomId'])});
+       db.query('select latitude, longitude, roomId from ActiveUsers where roomId in (?)',
+        {replacements : [roomsIds], type : sequelize.QueryTypes.SELECT})
+        .then(res4 => {
+          for(var i = 0; i <res4.length; i++){
+            var temp = distance(lat, long, res4[i]['latitude'], res4[i]['longitude']);
+            if(temp < currDistance) {
+              currDistance = temp;
+              shortestPoint = res4[i]['roomId'];
+            }
+          }
+          db.query('update ActiveUsers set roomId = ? where userId = ?',
+          {replacements : [shortestPoint, user], type : sequelize.QueryTypes.UPDATE})
+          .then(res5 => {
+            cb(false, shortestPoint, false, currDistance);
+          })
+          .catch(error => {
+            cb(error);
+          })
+        })
+        .catch(error => {
+          cb(error);
+        })
+     }
+   })
+   .catch(error => {
+     cb(error);
+   })
+}

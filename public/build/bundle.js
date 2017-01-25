@@ -21617,16 +21617,16 @@
 	    key: 'handleChatExit',
 	    value: function handleChatExit() {
 	      var self = this;
-	      //if (this.state.roomId) {
-	      _axios2.default.post('/exitChat', { id: this.state.userId }).then(function (res) {
-	        self.setState({
-	          chat_view: false,
-	          roomId: null
+	      if (this.state.roomId) {
+	        _axios2.default.post('/exitChat', { id: this.state.userId }).then(function (res) {
+	          self.setState({
+	            chat_view: false,
+	            roomId: null
+	          });
+	        }).catch(function (err) {
+	          console.log(err);
 	        });
-	      }).catch(function (err) {
-	        console.log(err);
-	      });
-	      // }
+	      }
 	    }
 	  }, {
 	    key: 'render',
@@ -42396,7 +42396,7 @@
 
 	  _createClass(ChatSelection, [{
 	    key: 'handleUserLocation',
-	    value: function handleUserLocation(e, searchCriteria) {
+	    value: function handleUserLocation(e) {
 	      var _this2 = this;
 
 	      e.preventDefault();
@@ -42408,17 +42408,15 @@
 	      };
 
 	      var success = function success(pos) {
+
 	        var crd = pos.coords;
+
 	        console.log('Your current position is:');
 	        console.log('Latitude : ' + crd.latitude);
 	        console.log('Longitude: ' + crd.longitude);
 	        console.log('More or less ' + crd.accuracy + ' meters.');
 
-	        if (searchCriteria === 'local') {
-	          _this2.handleLocalSearch(crd.latitude, crd.longitude);
-	        } else {
-	          _this2.handleGlobalSearch(crd.latitude, crd.longitude);
-	        }
+	        _this2.handleLocalSearch(crd.latitude, crd.longitude);
 	      };
 
 	      var error = function error(err) {
@@ -42429,16 +42427,16 @@
 	    }
 	  }, {
 	    key: 'handleGlobalSearch',
-	    value: function handleGlobalSearch(lat, long) {
+	    value: function handleGlobalSearch(e) {
 	      var _this3 = this;
 
-	      _axios2.default.get('/findGlobalRoom', {
-	        params: {
-	          latitude: lat,
-	          longitude: long
+	      e.preventDefault();
+
+	      _axios2.default.get('/findGlobalRoom').then(function (res) {
+	        if (res.data.host) {
+	          console.log('No rooms available, you are the host.');
 	        }
-	      }).then(function (res) {
-	        _this3.props.selectRoom(res.roomId);
+	        _this3.props.selectRoom(res.data.roomId);
 	      }).catch(function (error) {
 	        console.log(error);
 	      });
@@ -42454,7 +42452,12 @@
 	          longitude: long
 	        }
 	      }).then(function (res) {
-	        _this4.props.selectRoom(res.roomId);
+	        if (res.data.host) {
+	          console.log('No rooms available, you are the host.');
+	        } else {
+	          console.log('Closest user found is ' + res.data.distance + ' miles away.');
+	        }
+	        _this4.props.selectRoom(res.data.roomId);
 	      }).catch(function (error) {
 	        console.log(error);
 	      });
@@ -42471,14 +42474,14 @@
 	        _react2.default.createElement(
 	          _reactBootstrap.Button,
 	          { bsSize: 'large', block: true, onClick: function onClick(e) {
-	              return _this5.handleUserLocation(e, 'global');
+	              return _this5.handleGlobalSearch(e);
 	            } },
 	          'Global Chat'
 	        ),
 	        _react2.default.createElement(
 	          _reactBootstrap.Button,
 	          { bsSize: 'large', block: true, onClick: function onClick(e) {
-	              return _this5.handleUserLocation(e, 'local');
+	              return _this5.handleUserLocation(e);
 	            } },
 	          'Local Chat'
 	        )

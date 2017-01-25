@@ -33,14 +33,25 @@ app.get('/checkSession', (req, res) => {
 });
 
 app.get('/findGlobalRoom', (req, res) => {
-  console.log(req.query)
-  res.status(200).send()
+  dataHandler.findGlobalRoom(req.session.userId, (error, result, host) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      res.status(200).json({'host' : host, 'roomId' : result});
+    } 
+  })
 })
 
 app.get('/findLocalRoom', (req, res) => {
-  console.log(req)
-  res.status(200).send()
+ dataHandler.findLocalRoom(req.session.userId, req.query.latitude, req.query.longitude, (error, result, host, distance) => {
+   if (error) {
+     res.status(500).send(error);
+   } else {
+     res.status(200).json({'host' : host, 'roomId' : result, 'distance' : distance});
+   }
+ })
 })
+
 app.post('/signup', (req, res) => {
   dataHandler.createUser(req.body, (error, result) => {
     if (error) {

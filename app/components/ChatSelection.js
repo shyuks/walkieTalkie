@@ -10,7 +10,7 @@ class ChatSelection extends Component {
     this.handleUserLocation = this.handleUserLocation.bind(this);
   }
 
-handleUserLocation(e, searchCriteria){
+handleUserLocation(e){
 
   e.preventDefault();
 
@@ -21,17 +21,15 @@ handleUserLocation(e, searchCriteria){
   };
 
   var success = (pos) => {
+    
     var crd = pos.coords;
+
     console.log('Your current position is:');
     console.log(`Latitude : ${crd.latitude}`);
     console.log(`Longitude: ${crd.longitude}`);
     console.log(`More or less ${crd.accuracy} meters.`);
 
-    if (searchCriteria === 'local') {
-      this.handleLocalSearch(crd.latitude, crd.longitude);
-    } else {
-      this.handleGlobalSearch(crd.latitude, crd.longitude);
-    }
+    this.handleLocalSearch(crd.latitude, crd.longitude);
   }
 
   var error = (err) => {
@@ -41,16 +39,16 @@ handleUserLocation(e, searchCriteria){
   navigator.geolocation.getCurrentPosition(success, error, options);
 }
 
-handleGlobalSearch(lat, long){
+handleGlobalSearch(e){
 
-  axios.get('/findGlobalRoom', {
-    params : {
-      latitude : lat,
-      longitude : long
-    }
-  })
+  e.preventDefault();
+
+  axios.get('/findGlobalRoom')
   .then(res => {
-    this.props.selectRoom(res.roomId);
+    if (res.data.host) {
+      console.log('No rooms available, you are the host.');
+    }
+    this.props.selectRoom(res.data.roomId);
   })
   .catch(error => {
     console.log(error);
@@ -67,7 +65,12 @@ handleLocalSearch(lat, long){
     }
   })
   .then(res => {
-    this.props.selectRoom(res.roomId);
+    if (res.data.host) {
+      console.log('No rooms available, you are the host.');
+    } else {
+      console.log(`Closest user found is ${res.data.distance} miles away.`);
+    }
+    this.props.selectRoom(res.data.roomId);
   })
   .catch(error => {
     console.log(error);
@@ -79,8 +82,8 @@ handleLocalSearch(lat, long){
     const wellStyles = {maxWidth: 400, margin: '0 auto 10px'};
     const buttonsInstance = (
     <div className="well" style={wellStyles}>
-      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Global Chat</Button>
-      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Local Chat</Button>
+      <Button bsSize="large" block onClick={(e)=>this.handleGlobalSearch(e)}>Global Chat</Button>
+      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e)}>Local Chat</Button>
     </div>
     );
     return buttonsInstance;
