@@ -58,13 +58,9 @@ module.exports.userLogin = (email, password, cb) => {
 }
 
 module.exports.userLogout = (inputId, cb) => {
-  // db.query('delete from ActiveUsers where userId = ?',
-  // {replacements : [inputId], type : sequelize.QueryTypes.DELETE})
-  ActiveUsers.destroy({
-    where: {
-      userId : inputId}})
+  db.query('delete from ActiveUsers where userId = ?',
+  {replacements : [inputId], type : sequelize.QueryTypes.DELETE})
   .then(result => {
-    console.log('result: ', result)
     cb(false);
   })
   .catch(error => {
@@ -74,6 +70,7 @@ module.exports.userLogout = (inputId, cb) => {
 }
 
 module.exports.exitRoom = (inputId, cb) => {
+  console.log(inputId)
   db.query('update ActiveUsers set roomId = 0 where userId = ?', 
   {replacements : [inputId], type : sequelize.QueryTypes.UPDATE})
   .then(result => {
