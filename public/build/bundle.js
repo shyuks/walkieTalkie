@@ -42396,7 +42396,7 @@
 
 	  _createClass(ChatSelection, [{
 	    key: 'handleUserLocation',
-	    value: function handleUserLocation(e) {
+	    value: function handleUserLocation(e, selection) {
 	      var _this2 = this;
 
 	      e.preventDefault();
@@ -42416,7 +42416,11 @@
 	        console.log('Longitude: ' + crd.longitude);
 	        console.log('More or less ' + crd.accuracy + ' meters.');
 
-	        _this2.handleLocalSearch(crd.latitude, crd.longitude);
+	        if (selection === 'local') {
+	          _this2.handleLocalSearch(crd.latitude, crd.longitude);
+	        } else {
+	          _this2.handleGlobalSearch(crd.latitude, crd.longitude);
+	        }
 	      };
 
 	      var error = function error(err) {
@@ -42427,12 +42431,15 @@
 	    }
 	  }, {
 	    key: 'handleGlobalSearch',
-	    value: function handleGlobalSearch(e) {
+	    value: function handleGlobalSearch(lat, long) {
 	      var _this3 = this;
 
-	      e.preventDefault();
-
-	      _axios2.default.get('/findGlobalRoom').then(function (res) {
+	      _axios2.default.get('/findGlobalRoom', {
+	        params: {
+	          latitude: lat,
+	          longitude: long
+	        }
+	      }).then(function (res) {
 	        if (res.data.host) {
 	          console.log('No rooms available, you are the host.');
 	        }
@@ -42467,21 +42474,21 @@
 	    value: function render() {
 	      var _this5 = this;
 
-	      var wellStyles = { maxWidth: 400, margin: '0 auto 10px' };
+	      var wellStyles = { maxWidth: 500, margin: '0 auto 10px' };
 	      var buttonsInstance = _react2.default.createElement(
 	        'div',
 	        { className: 'well', style: wellStyles },
 	        _react2.default.createElement(
 	          _reactBootstrap.Button,
 	          { bsSize: 'large', block: true, onClick: function onClick(e) {
-	              return _this5.handleGlobalSearch(e);
+	              return _this5.handleUserLocation(e, 'global');
 	            } },
 	          'Global Chat'
 	        ),
 	        _react2.default.createElement(
 	          _reactBootstrap.Button,
 	          { bsSize: 'large', block: true, onClick: function onClick(e) {
-	              return _this5.handleUserLocation(e);
+	              return _this5.handleUserLocation(e, 'local');
 	            } },
 	          'Local Chat'
 	        )

@@ -1,4 +1,3 @@
-// Server goes here
 var express = require('express')
 var bodyParser = require('body-parser')
 var session = require('express-session')
@@ -6,10 +5,8 @@ var path = require('path')
 var database = require('./db/config.js')
 var Users = require('./db/schema/User.js')
 var ActiveUsers = require('./db/schema/ActiveUsers.js')
-
 var dataHandler = require('./db/data_handler.js')
 var port = 3000
-
 
 var app = express()
 module.exports.app = app;
@@ -21,7 +18,9 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(session({
   secret : "walkienotTalkie",
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  duration : 15 * 60 * 1000,
+  activeDuration : 5 * 60 * 1000
 }));
 
 app.get('/', (req, res) => {
@@ -33,22 +32,34 @@ app.get('/checkSession', (req, res) => {
 });
 
 app.get('/findGlobalRoom', (req, res) => {
-  dataHandler.findGlobalRoom(req.session.userId, (error, result, host) => {
-    if (error) {
-      res.status(500).send(error);
-    } else {
-      res.status(200).json({'host' : host, 'roomId' : result});
-    } 
+  dataHandler.createSession(req.session.userId, req.query.latitude, req.query.longitude)
+  .then(sessionCreated => {
+    dataHandler.findGlobalRoom(req.session.userId, (error, result, host) => {
+      if (error) {
+        res.status(500).send(error);
+      } else {
+        res.status(200).json({'host' : host, 'roomId' : result});
+      } 
+    })
+  })
+  .catch(error => {
+    res.status(500).send(error);
   })
 })
 
 app.get('/findLocalRoom', (req, res) => {
- dataHandler.findLocalRoom(req.session.userId, req.query.latitude, req.query.longitude, (error, result, host, distance) => {
-   if (error) {
-     res.status(500).send(error);
-   } else {
-     res.status(200).json({'host' : host, 'roomId' : result, 'distance' : distance});
-   }
+ dataHandler.createSession(req.session.userId, req.query.latitude, req.query.longitude)
+ .then(sessionCreated => {
+    dataHandler.findLocalRoom(req.session.userId, req.query.latitude, req.query.longitude, (error, result, host, distance) => {
+      if (error) {
+        res.status(500).send(error);
+      } else {
+        res.status(200).json({'host' : host, 'roomId' : result, 'distance' : distance});
+      }
+    })
+ })
+ .catch(error => {
+   res.status(200).send(error);
  })
 })
 
@@ -94,8 +105,6 @@ app.post('/exitChat', (req, res) => {
     }
   })
 })
-
-
 
 database.sync()
   .then(res => {

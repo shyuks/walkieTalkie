@@ -10,40 +10,47 @@ class ChatSelection extends Component {
     this.handleUserLocation = this.handleUserLocation.bind(this);
   }
 
-handleUserLocation(e){
+handleUserLocation(e, selection){
 
   e.preventDefault();
 
-  var options = {
+  let options = {
     enableHighAccuracy : true,
     timeout : 5000,
     maximumAge : 0
   };
 
-  var success = (pos) => {
+  let success = (pos) => {
     
-    var crd = pos.coords;
+    let crd = pos.coords;
 
     console.log('Your current position is:');
     console.log(`Latitude : ${crd.latitude}`);
     console.log(`Longitude: ${crd.longitude}`);
     console.log(`More or less ${crd.accuracy} meters.`);
-
-    this.handleLocalSearch(crd.latitude, crd.longitude);
+    
+    if (selection === 'local') {
+      this.handleLocalSearch(crd.latitude, crd.longitude);
+    } else {
+      this.handleGlobalSearch(crd.latitude, crd.longitude);
+    }
   }
 
-  var error = (err) => {
+  let error = (err) => {
     console.warn(`ERROR(${err.code}): ${err.message}`);
   }
 
   navigator.geolocation.getCurrentPosition(success, error, options);
 }
 
-handleGlobalSearch(e){
+handleGlobalSearch(lat, long){
 
-  e.preventDefault();
-
-  axios.get('/findGlobalRoom')
+  axios.get('/findGlobalRoom', {
+    params : {
+      latitude : lat,
+      longitude : long
+    }
+  })
   .then(res => {
     if (res.data.host) {
       console.log('No rooms available, you are the host.');
@@ -79,11 +86,11 @@ handleLocalSearch(lat, long){
 }
 
   render() {
-    const wellStyles = {maxWidth: 400, margin: '0 auto 10px'};
+    const wellStyles = {maxWidth: 500, margin: '0 auto 10px'};
     const buttonsInstance = (
     <div className="well" style={wellStyles}>
-      <Button bsSize="large" block onClick={(e)=>this.handleGlobalSearch(e)}>Global Chat</Button>
-      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e)}>Local Chat</Button>
+      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Global Chat</Button>
+      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Local Chat</Button>
     </div>
     );
     return buttonsInstance;
