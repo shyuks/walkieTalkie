@@ -1,21 +1,26 @@
-var sequelize = require('sequelize')
+var db = require('../config.js')
+var Sequelize = require('sequelize')
 
-var User = sequelize.define('User', {
-    username: Sequelize.String,
-    password: Sequelize.String,
-    email: Sequelize.String
-},
-{
-    tableName: 'user_table',
-    createdAt: 'date_of_creation'
-})
+var Users = db.define('Users', {
+  email : {
+    type : Sequelize.STRING,
+    allowNull : false,
+    uniqueValue : true
+  },
+  firstname : {
+    type : Sequelize.STRING,
+    allowNull : false
+  },
+  lastname : {
+    type : Sequelize.STRING,
+    allowNull : false
+  },
+  password : {
+    type : Sequelize.STRING,
+    allowNull : false
+  }
+});
 
 
-User.create({
-    username: 'greg',
-    password: 'password',
-    email: 'greg@yahoo.com'
-})
+module.exports = Users;
 
-sequelize.sync()
-module.exports = User
