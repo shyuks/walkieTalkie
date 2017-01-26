@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import UserLoginSignup from './Login_Signup.js';
+import LoginSignupView from './LoginSignupView.js';
 import ViewNavBar from './ViewNavbar.js';
 import Chatroom from './Chatroom.js';
 import ChatSelection from './ChatSelection.js';
@@ -123,7 +123,7 @@ class App extends React.Component {
        {
          this.state.mounted ? 
          (this.state.login_signup_view ? 
-         (<UserLoginSignup userSignupLogin={this.handleUserSignupLogin}/>) :
+         (<LoginSignupView userSignupLogin={this.handleUserSignupLogin}/>) :
          (this.state.chat_view ? <Chatroom userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
          : < ChatSelection selectRoom={this.handleChatSelection}/>))  
          :(<div>Loading Page</div>)
