@@ -185,6 +185,7 @@ class Chatroom extends Component {
 
         {messages}
         <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+
       </div>
     )
     }
