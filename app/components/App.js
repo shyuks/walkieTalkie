@@ -14,7 +14,6 @@ class App extends React.Component {
       roomId : null,
       login_signup_view : true,
       chat_view : false,
-      map_view : false,
       mounted : false
     }
     this.componentWillMount = this.componentWillMount.bind(this);
@@ -22,7 +21,6 @@ class App extends React.Component {
     this.handleUserLogout = this.handleUserLogout.bind(this);
     this.handleChatSelection = this.handleChatSelection.bind(this);
     this.handleChatExit = this.handleChatExit.bind(this);
-    this.handleMapView = this.handleMapView.bind(this);
   }
 
   componentWillMount(){
@@ -104,16 +102,6 @@ class App extends React.Component {
       console.log(err);
     })
    }
- }
-
- handleMapView(){
-   axios.get('/showMap')
-   .then(result => {
-
-   })
-   .catch(error => {
-     console.log(error);
-   })
  }
 
   render() {
