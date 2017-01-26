@@ -26,7 +26,7 @@ class Chatroom extends Component {
     if(event.keyCode === 13 && body) {
       var message = {
         body,
-        from: this.props.userId,
+        from: this.props.name,
         room: this.props.roomId
       }
       this.setState({
@@ -34,7 +34,7 @@ class Chatroom extends Component {
       })
       this.socket.emit('message', message)
       console.log('emmitting message back to server :', message);
-      event .target.value = '';
+      event.target.value = '';
     }
   } 
 
@@ -45,8 +45,6 @@ class Chatroom extends Component {
 
     return (
       <div>
-      {`User: ${this.props.userId}, Name: ${this.props.name} RoomId: ${this.props.roomId}`}
-
       <input type='text' placeholder='Enter a Message' onKeyUp={this.handleMessageSubmit} />
       {messages}
       </div>

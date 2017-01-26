@@ -125,8 +125,8 @@ io.on('connection', socket => {
     socket.join(room);
   })
   socket.on('message', message => {
-    console.log('sending message in room ', message.room);
-    io.sockets.in(message.room).emit('message', {
+    console.log('sending message in room ::::: ', message.room);
+    socket.broadcast.in(message.room).emit('message', {
       body: message.body,
       from: message.from
     })
