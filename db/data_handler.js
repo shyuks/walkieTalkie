@@ -67,7 +67,7 @@ module.exports.userLogin = (email, password, cb) => {
       util.comparePassword(password, userFound[0].password)
       .then(match => {
         if (match) {
-          cb(false, {id : userFound[0].id});
+          cb(false, {id : userFound[0].id, firstname: userFound[0].firstname});
         } else {
           cb('Password/Email combination did not match');
         }

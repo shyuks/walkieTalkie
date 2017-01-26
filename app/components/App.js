@@ -10,9 +10,11 @@ class App extends React.Component {
     super(props)
     this.state = {
       userId : null,
+      name : null,
       roomId : null,
       login_signup_view : true,
       chat_view : false,
+      map_view : false,
       mounted : false
     }
     this.componentWillMount = this.componentWillMount.bind(this);
@@ -20,6 +22,7 @@ class App extends React.Component {
     this.handleUserLogout = this.handleUserLogout.bind(this);
     this.handleChatSelection = this.handleChatSelection.bind(this);
     this.handleChatExit = this.handleChatExit.bind(this);
+    this.handleMapView = this.handleMapView.bind(this);
   }
 
   componentWillMount(){
@@ -29,6 +32,7 @@ class App extends React.Component {
       if (res.data.roomId) {
         this.setState({
           userId : res.data.id,
+          name : res.data.firstname,
           roomId : res.data.roomId,
           mounted : true,
           login_signup_view : false,
@@ -37,6 +41,7 @@ class App extends React.Component {
       } else {
         this.setState({
           userId : res.data.id,
+          name : res.data.firstname,
           mounted : true,
           login_signup_view : false
         })
@@ -55,6 +60,7 @@ class App extends React.Component {
  handleUserSignupLogin(res){
    this.setState({
      userId : res.id,
+     name : res.firstname,
      login_signup_view  : false
    })
  }
@@ -65,6 +71,9 @@ class App extends React.Component {
    .then(res => {
      self.setState({
        userId : null,
+       roomId : null,
+       name : null,
+       chat_view : false,
        login_signup_view : true
      })
    })
@@ -76,7 +85,8 @@ class App extends React.Component {
  handleChatSelection(inputRoomId){
    this.setState({
      roomId : inputRoomId,
-     chat_view : true
+     chat_view : true,
+     map_view : false
    })
  }
 
@@ -96,15 +106,25 @@ class App extends React.Component {
    }
  }
 
+ handleMapView(){
+   axios.get('/showMap')
+   .then(result => {
+
+   })
+   .catch(error => {
+     console.log(error);
+   })
+ }
+
   render() {
     return (
       <div>
-      <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit}/>
+        <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit} map={this.handleMapView}/>
        {
          this.state.mounted ? 
          (this.state.login_signup_view ? 
          (<UserLoginSignup userSignupLogin={this.handleUserSignupLogin}/>) :
-         (this.state.chat_view ? <Chatroom userId={this.state.userId} roomId={this.state.roomId}/> 
+         (this.state.chat_view ? <Chatroom userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
          : < ChatSelection selectRoom={this.handleChatSelection}/>))  
          :(<div>Loading Page</div>)
        }
