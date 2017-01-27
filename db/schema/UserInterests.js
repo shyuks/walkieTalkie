@@ -1,7 +1,7 @@
 var db = require('../config.js')
 var Sequelize = require('sequelize')
 
-var UserInterest = db.define('UserInterest', {
+var UserInterests = db.define('UserInterest', {
   userId : {
     type : Sequelize.INTEGER,
     allowNull : false
@@ -12,4 +12,4 @@ var UserInterest = db.define('UserInterest', {
   }
 })
 
-module.exports = UserInterest;
+module.exports = UserInterests;

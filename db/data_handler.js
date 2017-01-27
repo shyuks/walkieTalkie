@@ -241,3 +241,49 @@ module.exports.saveUserInterests = (inputId, interests, cb) => {
     cb(error);
   })
 }
+
+module.exports.findCommonUser = (user, cb) => {
+  db.query('select roomId from ActiveUsers where roomId != 0 group by roomId having count(roomId) < 10', 
+    {type : sequelize.QueryTypes.SELECT})
+    .then(res1 => {
+      if (res1.length === 0) {
+        cb(false, false);
+      } else {
+        db.query('select interestId from UserInterest where userId = ?',
+        {replacements : [user], type : sequelize.QueryTypes.SELECT})
+        .then(foundInterests => {
+
+          let roomsIds = [];
+          let interestIds = [];
+          res1.forEach(id => {roomsIds.push(id['roomId'])});
+          foundInterests.forEach(interest => {interestIds.push(interest['interestId'])});
+
+          db.query('select UI.userId AS User, AU.roomId AS Room, count(*) AS Total_Match from ActiveUsers AU join UserInterests UI on UI.userId = AU.userId where UI.interestId in (?) AU.roomId in (?) group by UI.userId, AU.roomId order by Total_Match',
+          {replacements : [interestIds, roomsIds], type : sequelize.QueryTypes.SELECT})
+          .then(foundUsers => {
+            if(foundUsers.length===0){
+              cb(false, false)
+            } else {
+              db.query('update ActiveUsers set roomId = ? where userId = ?',
+              {replacements : [foundUsers[0]['Room'], user], type : sequelize.QueryTypes.UPDATE})
+              .then(updatedUser => {
+                cb(false, foundUsers[0]['Room']);
+              })
+              .catch(error => {
+                cb(error)
+              })
+            }
+          })
+          .catch(error => {
+            cb(error);
+          })
+        })
+        .catch(error => {
+          cb(error)
+        })
+      }
+    })
+    .catch(error => {
+      cb(error)
+    })
+}
