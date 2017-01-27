@@ -32,6 +32,7 @@ class Chatroom extends Component {
     this.socket.emit('join room', this.props.roomId);
     console.log('this is the room after mounting: ', this.props.roomId)
     
+    
     //listener for any incoming messages via socket
     this.socket.on('message', message => {
       this.setState({
