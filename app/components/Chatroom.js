@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import ChatLine from './ChatLineItem'
-import io from 'socket.io-client'
+import ChatLine from './ChatLineItem';
+import io from 'socket.io-client';
+import { Popover } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
 class Chatroom extends Component {
   constructor(props){
@@ -43,17 +45,20 @@ class Chatroom extends Component {
 
   handleUsernameClick(userId) {
     //on click of name display that user's interests and option for private chat
+
+    
   }
 
   render(){
+    console.log('this is the socket', this.socket.json.id);
     var messages = this.state.messages.map((message, index) => {
-      return <ul key={index}><ChatLine message={message} userClick={this.handleUsernameClick}/></ul>
+      return <ul key={index}><ChatLine message={message}/></ul>
     })
 
     return (
       <div>
       {messages}
-      <input type='text' placeholder='Enter a Message' onKeyUp={this.handleMessageSubmit} />
+      <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
       </div>
     )
   }
