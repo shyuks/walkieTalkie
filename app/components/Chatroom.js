@@ -23,8 +23,8 @@ class Chatroom extends Component {
         messages: [message, ...this.state.messages].slice(0, 50)
       });
     })
-    this.socket.on('private', invite => {
-      console.log('the result from invite is: ', invite);
+    this.socket.on('requestModal', ownSocketId => {
+      console.log('the result from invite is: ', ownSocketId);
     })
   }
 
@@ -35,7 +35,8 @@ class Chatroom extends Component {
         body,
         from: this.props.name,
         room: this.props.roomId,
-        user: this.props.userId
+        user: this.props.userId,
+        socketId: this.socket.json.id
       }
       this.setState({
         messages: [message, ...this.state.messages].slice(0, 50)
@@ -46,13 +47,13 @@ class Chatroom extends Component {
     }
   }
 
-  handlePrivateChat() {
-    this.socket.emit('private', )
+  handlePrivateChat(recipientSocketId) {
+    console.log('requesting private chat with', recipientSocketId);
+    this.socket.emit('privateRequest', recipientSocketId);
   };
 
 
   render(){
-    console.log('this is the socket', this.socket.json.id);
     var messages = this.state.messages.map((message, index) => {
       return <ul key={index}><ChatLine message={message} privateChat={this.handlePrivateChat}/></ul>
     })

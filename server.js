@@ -152,7 +152,7 @@ app.post('/saveInterest', (req, res) => {
 
 io.on('connection', socket => {
   console.log('sockets connected');
-  socket.on('join room', function(room) {
+  socket.on('join room', room => {
     console.log('joining room ', room);
     socket.join(room);
   })
@@ -161,12 +161,13 @@ io.on('connection', socket => {
     socket.broadcast.in(message.room).emit('message', {
       body: message.body,
       from: message.from,
-      user: message.user
+      user: message.user,
+      socketId: message.socketId
     })
   })
-  socket.on('private', function(privateRoom) {
-    console.log('joining private room', privateRoom);
-    socket.join(privateRoom)
+  socket.on('privateRequest', recipientSocketId => {
+    console.log('requesting user to join private room', recipientSocketId);
+    socket.broadcast.to(recipientSocketId).emit('requestModal', recipientSocketId)
   })
 })
 
