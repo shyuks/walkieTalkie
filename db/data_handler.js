@@ -240,6 +240,7 @@ module.exports.saveUserInterests = (inputId, interests, cb) => {
   .catch(error => {
     cb(error);
   })
+
 }
 
 module.exports.findCommonUser = (user, cb) => {
@@ -286,4 +287,5 @@ module.exports.findCommonUser = (user, cb) => {
     .catch(error => {
       cb(error)
     })
+
 }

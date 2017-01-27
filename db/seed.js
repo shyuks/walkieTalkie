@@ -1,7 +1,9 @@
+
 // let sampleData = require('./sampleLocationData.json');
 // let Au = require('./schema/ActiveUsers.js');
 // let i = require('./schema/Interests.js');
 // let Ui = require('./schema/UserInterests.js');
+
 
 
 // Au.destroy({truncate : true})
@@ -17,7 +19,9 @@
 //     };
 //   })
 
+
 // let iI = [
+
 //   'Soccer', 'Basketball', 'Football', 'Baseball', 'Hockey', 
 //   'Beer', 'Wine', 'Tequila', 'Vodka', 'Whiskey', 'Shopping', 'Shoes', 'Style',
 //   'Country', 'Hiphop', 'RnB', 'Jazz', 'EDM', 'Classical', 'Rock', 
@@ -29,6 +33,7 @@
 //     interest : int
 //   })
 // })
+
 
 // let id = [1,8,15,22,29,36,43,50,57,64,71,78,85,92,99,106,113,120,127,134,141,148,155,162,169,176]
 

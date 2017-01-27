@@ -25,6 +25,7 @@ class ViewNavBar extends Component {
   render(){
   return (
   <Navbar inverse collapseOnSelect>
+
       {this.props.userId ?
       <Nav>
       <NavItem onClick={this.props.logout}>Logout</NavItem>
@@ -40,6 +41,7 @@ class ViewNavBar extends Component {
             <UserInterests user={this.props.userId} toggleModal={this.toggleModal}/>
           </Modal.Body>
         </Modal>
+
       </Col>
 
       </NavItem>
@@ -47,6 +49,7 @@ class ViewNavBar extends Component {
       :
       <NavItem></NavItem>
       }
+
   </Navbar>
   )
   }

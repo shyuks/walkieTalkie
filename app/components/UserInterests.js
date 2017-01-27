@@ -5,6 +5,7 @@ import { Grid } from 'react-bootstrap';
 import { Row } from 'react-bootstrap';
 import { FormGroup } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
+
 import { Col } from 'react-bootstrap';
 
 
@@ -65,10 +66,10 @@ class UserInterests extends Component {
     return (
         <Grid>
             <Row>            
+
               {
                 this.state.mounted ? 
-                (
-                  
+                (        
                   <Col xs={8} md={8}>
                   <FormGroup >
 
@@ -82,6 +83,7 @@ class UserInterests extends Component {
                           />
                 }) 
                 }
+
                 </FormGroup>
                 <Col xs={6} md={6}>
                 <Button onClick={this.handleSaveInterest}>Save</Button>
