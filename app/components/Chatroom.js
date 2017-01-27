@@ -12,7 +12,7 @@ class Chatroom extends Component {
     }
     this.handleMessageSubmit = this.handleMessageSubmit.bind(this);
     this.componentWillMount = this.componentWillMount.bind(this);
-    this.handleUsernameClick = this.handleUsernameClick.bind(this);
+    this.handlePrivateChat = this.handlePrivateChat.bind(this);
   }
 
   componentWillMount() {
@@ -22,6 +22,9 @@ class Chatroom extends Component {
       this.setState({
         messages: [message, ...this.state.messages].slice(0, 50)
       });
+    })
+    this.socket.on('private', invite => {
+      console.log('the result from invite is: ', invite);
     })
   }
 
@@ -38,21 +41,20 @@ class Chatroom extends Component {
         messages: [message, ...this.state.messages].slice(0, 50)
       })
       this.socket.emit('message', message)
-      console.log('emmitting message back to server :', message);
+      console.log('emitting message back to server :', message);
       event.target.value = '';
     }
   }
 
-  handleUsernameClick(userId) {
-    //on click of name display that user's interests and option for private chat
+  handlePrivateChat() {
+    this.socket.emit('private', )
+  };
 
-    
-  }
 
   render(){
     console.log('this is the socket', this.socket.json.id);
     var messages = this.state.messages.map((message, index) => {
-      return <ul key={index}><ChatLine message={message}/></ul>
+      return <ul key={index}><ChatLine message={message} privateChat={this.handlePrivateChat}/></ul>
     })
 
     return (

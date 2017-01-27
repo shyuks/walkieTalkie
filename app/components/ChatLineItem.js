@@ -10,11 +10,17 @@ class ChatLineItem extends Component {
     this.state = {
       interests: ['test', 'sean']
     }
-  }
   //bind all functions here
+  this.handleUsernameClick = this.handleUsernameClick.bind(this);
+  }
+
+  handleUsernameClick () {
+    console.log(this.props.message.user)
+    axios.get('/')
+  }
     
   render() {
-    var handleUserNameClick = (
+    var addPopover = (
       <Popover id="popover-trigger-click-root-close" title="User Interests">
         {this.state.interests.map((interest, index) => {
           return <ul key={index}><InterestsItem int={interest}/></ul>
@@ -25,7 +31,7 @@ class ChatLineItem extends Component {
 
     return (
     <div>
-    <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={handleUserNameClick}>
+    <OverlayTrigger onClick={this.handleUsernameClick} trigger="click" rootClose placement="bottom" overlay={addPopover}>
           <b>{this.props.message.from}</b>
     </OverlayTrigger>: {this.props.message.body}
     </div>

@@ -164,6 +164,10 @@ io.on('connection', socket => {
       user: message.user
     })
   })
+  socket.on('private', function(privateRoom) {
+    console.log('joining private room', privateRoom);
+    socket.join(privateRoom)
+  })
 })
 
 database.sync()

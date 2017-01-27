@@ -2,7 +2,7 @@ import React from 'react'
 
 var UserInterestsItemized = ({int}) => (
   <div>
-    {int}
+    <li>{int}</li>
   </div>
 );
 
