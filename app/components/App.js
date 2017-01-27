@@ -114,7 +114,7 @@ class App extends React.Component {
          (<LoginSignupView userSignupLogin={this.handleUserSignupLogin}/>) :
          (this.state.chat_view ? <Chatroom userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
          : < ChatSelection selectRoom={this.handleChatSelection}/>))  
-         :(<div>Loading Page</div>)
+         :(<div></div>)
        }
       </div>
     )
