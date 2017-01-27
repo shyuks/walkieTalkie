@@ -81,39 +81,39 @@ class SignUp extends Component {
           <Col xs={12} md={12}>
             <Form horizontal onSubmit={this.handleUserSignup}>
                <FormGroup controlId="formHorizontalEmail">
-                <Col componentClass={ControlLabel} sm={2}>
+                <Col componentClass={ControlLabel} >
                 Email
                 </Col>
-                <Col sm={10}>
+                <Col>
                 <FormControl type="email" placeholder="Email" value={this.state.signupEmail} onChange={this.handleSignupEmail} required={true}/>
                 </Col>
                 </FormGroup>
                 <FormGroup controlId="formHorizontalName">
-                <Col componentClass={ControlLabel} sm={2}>
+                <Col componentClass={ControlLabel}>
                 First Name
                 </Col>
-                <Col sm={10}>
+                <Col>
                 <FormControl type="name" placeholder="First Name" value={this.state.signupFirstName} onChange={this.handleSignupFirtName} required={true}/>
                 </Col>
                 </FormGroup>
                 <FormGroup controlId="formHorizontalEmail">
-                <Col componentClass={ControlLabel} sm={2}>
+                <Col componentClass={ControlLabel}>
                 Last Name
                 </Col>
-                <Col sm={10}>
+                <Col>
                 <FormControl type="name" placeholder="Lastname" value={this.state.signupLastName} onChange={this.handleSignupLastName} required={true}/>
                 </Col>
                 </FormGroup>
                 <FormGroup controlId="formHorizontalPassword">
-                <Col componentClass={ControlLabel} sm={2}>
+                <Col componentClass={ControlLabel}>
                 Password
                 </Col>
-                <Col sm={10}>
+                <Col>
                 <FormControl type="password" placeholder="Password" value={this.state.signupPassword} onChange={this.handleSignupPassword} required={true}/>
                 </Col>
                 </FormGroup>
                 <FormGroup>
-                <Col smOffset={2} sm={10}>
+                <Col>
                 <Button type="submit">
                 Sign Up
                 </Button>
@@ -121,7 +121,7 @@ class SignUp extends Component {
                 </FormGroup>
                 </Form>
           </Col>
-            <Col smOffset={2} sm={10}>
+            <Col >
               <Button onClick={()=>this.props.handleView()}>
               Login
               </Button>

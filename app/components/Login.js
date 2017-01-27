@@ -63,23 +63,23 @@ class Login extends Component {
           <Col xs={12} md={12}>
             <Form horizontal onSubmit={this.handleUserLogin}>
               <FormGroup controlId="formHorizontalEmail">
-                <Col componentClass={ControlLabel} sm={2}>
+                <Col componentClass={ControlLabel}>
                 Email
                 </Col>
-                <Col sm={10}>
+                <Col >
                 <FormControl type="email" placeholder="Email" value={this.state.loginEmail} onChange={this.handleLoginEmail} required={true}/>
                 </Col>
                 </FormGroup>
                 <FormGroup controlId="formHorizontalPassword">
-                <Col componentClass={ControlLabel} sm={2}>
+                <Col componentClass={ControlLabel} >
                 Password
                 </Col>
-                <Col sm={10}>
+                <Col >
                 <FormControl type="password" placeholder="Password" value={this.state.loginPassword} onChange={this.handleLoginPassword} required={true}/>
                 </Col>
                 </FormGroup>
                 <FormGroup>
-                <Col smOffset={2} sm={10}>
+                <Col >
                 <Button type="submit">
                 Login
                 </Button>
@@ -87,7 +87,7 @@ class Login extends Component {
                </FormGroup>
                </Form>
             </Col>
-            <Col smOffset={2} sm={10}>
+            <Col >
               <Button onClick={()=> this.props.handleView()} type="submit">
               Signup
               </Button>
