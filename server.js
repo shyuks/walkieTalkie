@@ -165,9 +165,9 @@ io.on('connection', socket => {
       socketId: message.socketId
     })
   })
-  socket.on('privateRequest', recipientSocketId => {
-    console.log('requesting user to join private room', recipientSocketId);
-    socket.broadcast.to(recipientSocketId).emit('requestModal', recipientSocketId)
+  socket.on('privateRequest', recipSocketId => {
+    console.log('requesting user to join private room', recipSocketId);
+    socket.broadcast.to(recipSocketId).emit('requestModal', recipSocketId)
   })
 })
 

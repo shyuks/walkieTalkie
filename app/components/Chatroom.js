@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import ChatLine from './ChatLineItem';
 import io from 'socket.io-client';
-import { Popover } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 
 class Chatroom extends Component {
   constructor(props){
     super(props);
     this.state = {
-      messages: []
+      messages: [],
+      show: false
     }
     this.handleMessageSubmit = this.handleMessageSubmit.bind(this);
     this.componentWillMount = this.componentWillMount.bind(this);
@@ -24,7 +25,10 @@ class Chatroom extends Component {
       });
     })
     this.socket.on('requestModal', ownSocketId => {
-      console.log('the result from invite is: ', ownSocketId);
+      console.log('requesting modal');
+      this.setState({
+        show: true
+      })
     })
   }
 
@@ -47,9 +51,9 @@ class Chatroom extends Component {
     }
   }
 
-  handlePrivateChat(recipientSocketId) {
-    console.log('requesting private chat with', recipientSocketId);
-    this.socket.emit('privateRequest', recipientSocketId);
+  handlePrivateChat(recipSocketId) {
+    console.log('requesting private chat with', recipSocketId);
+    this.socket.emit('privateRequest', recipSocketId);
   };
 
 
@@ -58,13 +62,22 @@ class Chatroom extends Component {
       return <ul key={index}><ChatLine message={message} privateChat={this.handlePrivateChat}/></ul>
     })
 
-    return (
+      return (
       <div>
-      {messages}
-      <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+        <Modal dialogClassName="custom-modal">
+          <Modal.Header>
+            <Modal.Title show={this.state.show} id="contained-modal-title-lg">Private Chat Request</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <h1>Hello</h1>
+          </Modal.Body>
+        </Modal>
+
+        {messages}
+        <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
       </div>
     )
-  }
+    }
 }
 
 export default Chatroom;
