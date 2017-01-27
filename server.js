@@ -152,8 +152,6 @@ app.post('/saveInterest', (req, res) => {
 
 app.post('/privateRoom', (req, res) => {
   req.session.roomId = req.body.id;
-  console.log('req session room id: ', req.session.roomId);
-  console.log('req session: ', req.session);
   res.status(200).send('New private room created')
 })
 
@@ -164,6 +162,7 @@ io.on('connection', socket => {
     socket.join(room);
   })
   socket.on('message', message => {
+    console.log('you are sending the message to room: ', message.room);
     socket.broadcast.in(message.room).emit('message', {
       body: message.body,
       from: message.from,
@@ -171,16 +170,18 @@ io.on('connection', socket => {
       socketId: message.socketId
     })
   })
-  socket.on('privateRequest', privChatData => {
-    console.log('privchatdata in private request socket: ', privChatData)
-    socket.broadcast.to(privChatData.receiver).emit('requestModal', privChatData)
+  socket.on('privateRequest', pcData => {
+    socket.broadcast.to(pcData.receiver).emit('requestModal', pcData)
   })
-  socket.on('acceptRequest', privChatData => {
-    console.log('user accepted sending room data back');
-    socket.broadcast.to(privChatData.sender).emit('join private', privChatData.receiver)
+  socket.on('acceptedRequest', pcData => {
+    socket.broadcast.to(pcData.sender).emit('join private', pcData)
   })
-  socket.on('declineRequest', privChatData => {
-    socket.broadcast.to(privChatData.sender).emit('declined', privChatData)
+  socket.on('leaveRoom', room => {
+    console.log("leaving room ", room);
+    socket.leave(room);
+  })
+  socket.on('declineRequest', pcData => {
+    socket.broadcast.to(pcData.sender).emit('declined', pcData)
   })
 })
 

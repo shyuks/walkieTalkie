@@ -105,9 +105,9 @@ class App extends React.Component {
    }
  }
 
- handleRoomChange(inputRoomId) {
+ handleRoomChange(newRoom) {
    this.setState({
-     roomId : inputRoomId
+     roomId: newRoom
    })
  }
 

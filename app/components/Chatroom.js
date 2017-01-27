@@ -25,34 +25,48 @@ class Chatroom extends Component {
   }
 
   componentDidMount() {
+    //creating a socket connection
     this.socket = io('/');
+    
+    //join a room upon connection
     this.socket.emit('join room', this.props.roomId);
+    console.log('this is the room after mounting: ', this.props.roomId)
+    
+    //listener for any incoming messages via socket
     this.socket.on('message', message => {
       this.setState({
         messages: [message, ...this.state.messages].slice(0, 50)
       });
     });
-    this.socket.on('requestModal', privChatData => {
-      console.log('privChatData in requestModal: ', privChatData)
+
+    //listener for the receiver of a private chat request
+    this.socket.on('requestModal', pcData => {
       this.setState({
-        privateData: privChatData,
+        privateData: pcData,
         showRequest: true
       });
     });
-    this.socket.on('join private', privChatData => {
-      console.log('joining newly created room', privChatData);
-      this.state.privateDate = privChatData;
+
+    //listener for sender to join private room that the receiver has created upon acceptance
+    this.socket.on('join private', pcData => {
+      console.log('joining newly created room', pcData);
+      this.setState({
+        privateData: pcData
+      })
       this.joinPrivate();
     });
-    this.socket.on('declined', privChatData => {
-      console.log('private chat data in declined ', privChatData);
+
+    //listener for sender to see their offer has been declined
+    this.socket.on('declined', pcData => {
+      console.log('private chat data in declined ', pcData);
       this.setState({
-        privateData: privChatData,
+        privateData: pcData,
         rejected: true
       })
     })
   };
 
+  //handle all message submissions
   handleMessageSubmit(event) {
     var body = event.target.value;
     if(event.keyCode === 13 && body) {
@@ -71,6 +85,7 @@ class Chatroom extends Component {
     }
   }
 
+  //handle a private chat request click (initiated by user)
   handlePrivateChat(recipSID, recipName) {
     this.socket.emit('privateRequest', {
       receiver: recipSID,
@@ -80,21 +95,31 @@ class Chatroom extends Component {
     });
   };
 
+  //accept a received private chat request
   acceptPrivateChat() {
-    axios.post('/privateRoom', {id : this.state.privateData.receiver})
+    //leave current room before joining new room
+    this.socket.emit('leaveRoom', this.props.roomId);
+    var priv = this.state.privateData
+    axios.post('/privateRoom', {id : priv.receiver})
       .then(res => {
-        console.log(res)
-        this.socket.emit('acceptRequest', this.state.privateData)
+        //emit to socket that the request has been accepted
+        this.socket.emit('acceptedRequest', priv);
+        //initiate a room change in parent
+        this.props.roomChange(priv.receiver);
+        this.setState({
+          messages: [],
+          showRequest: false
+        })
       })
-      .then(rerender => {
-        console.log('running the roomchange');
-        this.props.roomChange(this.state.privateData.receiver)
+      .then(check => {
+        console.log('checking room after accepting private chat: ', this.props.roomId)
       })
       .catch(err => {
         console.log('error in creating private chat axios post: ', err);
       })
   };
 
+  //decline a received private chat request
   declinePrivateChat() {
     this.socket.emit('declineRequest', this.state.privateData);
     this.setState({
@@ -102,17 +127,27 @@ class Chatroom extends Component {
     });
   };
 
+
+  //sender joins the private chat after receiver accepted and created a room
   joinPrivate() {
-    axios.post('/privateRoom', {id : this.state.privateData.receiver})
+    //leave current room before joining new private room
+    this.socket.emit('leaveRoom', this.props.roomId);
+    var priv = this.state.privateData
+    axios.post('/privateRoom', {id : priv.receiver})
       .then(res => {
+        console.log('this is the room in joinPrivate ', priv.receiver)
         console.log(res)
-        this.props.roomChange(this.state.privateData.receiver)
+        this.props.roomChange(priv.receiver);
+        this.setState({
+          messages: []
+        })
       })
       .catch(err => {
         console.log('error in creating private chat axios post: ', err);
       })
   };
 
+  //close rejection modal
   acceptRejection() {
     this.setState({
       rejected: false
@@ -124,7 +159,7 @@ class Chatroom extends Component {
       return <ul key={index}><ChatLine message={message} privateChat={this.handlePrivateChat}/></ul>
     })
 
-    console.log(this.props.roomId)
+    console.log('this is the room you are in ', this.props.roomId)
       return (
       <div>
         <Modal show={this.state.showRequest} dialogClassName="custom-modal">
