@@ -33,6 +33,7 @@ class ViewNavBar extends Component {
       {this.props.userId ?
       <NavItem onClick={this.toggleModal}>Interest
       <Col xs={12} md={12}>
+
         <Modal show={this.state.show} dialogClassName="custom-modal">
         <Modal.Header>
             <Modal.Title id="contained-modal-title-lg">You Interests</Modal.Title>
@@ -42,6 +43,7 @@ class ViewNavBar extends Component {
           </Modal.Body>
         </Modal>
       </Col>
+
       </NavItem>
       :
       <NavItem></NavItem>

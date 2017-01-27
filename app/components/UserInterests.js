@@ -7,6 +7,7 @@ import { FormGroup } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Col } from 'react-bootstrap';
 
+
 class UserInterests extends Component {
   constructor(props){
     super(props)
@@ -63,14 +64,14 @@ class UserInterests extends Component {
   render (){
     return (
         <Grid>
-            <Row>
-              
+            <Row>            
               {
                 this.state.mounted ? 
                 (
                   
                   <Col xs={8} md={8}>
                   <FormGroup >
+
                 { 
                 this.state.allInterests.map(interest => {
                   return <AvailableInterests
@@ -92,7 +93,6 @@ class UserInterests extends Component {
                 )
                 : <div></div>
               }
-              
             </Row>
           </Grid>
     )

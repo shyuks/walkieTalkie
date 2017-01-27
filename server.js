@@ -136,6 +136,17 @@ app.post('/exitChat', (req, res) => {
     } else {
       req.session.roomId = null;
       res.status(200).send('Exit Successful')
+
+    }
+  })
+})
+
+app.post('/saveInterest', (req, res) => {
+  dataHandler.saveUserInterests(req.session.userId, req.body, (error, result) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      res.status(200).send('Save Successful')
     }
   })
 })

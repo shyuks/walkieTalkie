@@ -122,6 +122,7 @@ class SignUp extends Component {
                 </Form>
           </Col>
             <Col >
+
               <Button onClick={()=>this.props.handleView()}>
               Login
               </Button>

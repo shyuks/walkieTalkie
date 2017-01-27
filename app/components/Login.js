@@ -87,7 +87,9 @@ class Login extends Component {
                </FormGroup>
                </Form>
             </Col>
+
             <Col >
+
               <Button onClick={()=> this.props.handleView()} type="submit">
               Signup
               </Button>
