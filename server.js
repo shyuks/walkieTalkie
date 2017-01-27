@@ -93,6 +93,16 @@ app.get('/findLocalRoom', (req, res) => {
  })
 })
 
+app.get('/findCommonUser', (req, res) => {
+  dataHandler.findCommonUser(req.session.userId, (error, result) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      res.status(200).json(result);
+    } 
+  })
+});
+
 app.post('/signup', (req, res) => {
   dataHandler.createUser(req.body, (error, result) => {
     if (error) {
