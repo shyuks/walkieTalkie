@@ -21,6 +21,7 @@ class App extends React.Component {
     this.handleUserLogout = this.handleUserLogout.bind(this);
     this.handleChatSelection = this.handleChatSelection.bind(this);
     this.handleChatExit = this.handleChatExit.bind(this);
+    this.handleRoomChange = this.handleRoomChange.bind(this);
   }
 
   componentWillMount(){
@@ -104,6 +105,12 @@ class App extends React.Component {
    }
  }
 
+ handleRoomChange(inputRoomId) {
+   this.setState({
+     roomId : inputRoomId
+   })
+ }
+
   render() {
     return (
       <div>
@@ -112,7 +119,7 @@ class App extends React.Component {
          this.state.mounted ? 
          (this.state.login_signup_view ? 
          (<LoginSignupView userSignupLogin={this.handleUserSignupLogin}/>) :
-         (this.state.chat_view ? <Chatroom userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
+         (this.state.chat_view ? <Chatroom roomChange={this.handleRoomChange} userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
          : < ChatSelection selectRoom={this.handleChatSelection}/>))  
          :(<div></div>)
        }

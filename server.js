@@ -150,6 +150,13 @@ app.post('/saveInterest', (req, res) => {
   })
 })
 
+app.post('/privateRoom', (req, res) => {
+  req.session.roomId = req.body.id;
+  console.log('req session room id: ', req.session.roomId);
+  console.log('req session: ', req.session);
+  res.status(200).send('New private room created')
+})
+
 io.on('connection', socket => {
   console.log('sockets connected');
   socket.on('join room', room => {
@@ -157,7 +164,6 @@ io.on('connection', socket => {
     socket.join(room);
   })
   socket.on('message', message => {
-    console.log('sending message in room ::::: ', message.room);
     socket.broadcast.in(message.room).emit('message', {
       body: message.body,
       from: message.from,
@@ -165,9 +171,16 @@ io.on('connection', socket => {
       socketId: message.socketId
     })
   })
-  socket.on('privateRequest', recipSocketId => {
-    console.log('requesting user to join private room', recipSocketId);
-    socket.broadcast.to(recipSocketId).emit('requestModal', recipSocketId)
+  socket.on('privateRequest', privChatData => {
+    console.log('privchatdata in private request socket: ', privChatData)
+    socket.broadcast.to(privChatData.receiver).emit('requestModal', privChatData)
+  })
+  socket.on('acceptRequest', privChatData => {
+    console.log('user accepted sending room data back');
+    socket.broadcast.to(privChatData.sender).emit('join private', privChatData.receiver)
+  })
+  socket.on('declineRequest', privChatData => {
+    socket.broadcast.to(privChatData.sender).emit('declined', privChatData)
   })
 })
 

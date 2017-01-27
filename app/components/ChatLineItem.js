@@ -24,7 +24,7 @@ class ChatLineItem extends Component {
         {this.state.interests.map((interest, index) => {
           return <ul key={index}><InterestsItem int={interest}/></ul>
         })}
-        <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId)}}>Invite to Private Chat</Button>
+        <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
       </Popover>
     );
 
