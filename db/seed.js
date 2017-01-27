@@ -1,6 +1,7 @@
-var sampleData = require('./sampleLocationData.json');
-var Au = require('./schema/ActiveUsers.js');
-var i = require('./schema/Interests.js');
+// let sampleData = require('./sampleLocationData.json');
+// let Au = require('./schema/ActiveUsers.js');
+// let i = require('./schema/Interests.js');
+// let Ui = require('./schema/UserInterests.js');
 
 
 // Au.destroy({truncate : true})
@@ -16,7 +17,7 @@ var i = require('./schema/Interests.js');
 //     };
 //   })
 
-// var iI = [
+// let iI = [
 //   'Soccer', 'Basketball', 'Football', 'Baseball', 'Hockey', 
 //   'Beer', 'Wine', 'Tequila', 'Vodka', 'Whiskey', 'Shopping', 'Shoes', 'Style',
 //   'Country', 'Hiphop', 'RnB', 'Jazz', 'EDM', 'Classical', 'Rock', 
@@ -28,3 +29,17 @@ var i = require('./schema/Interests.js');
 //     interest : int
 //   })
 // })
+
+// let id = [1,8,15,22,29,36,43,50,57,64,71,78,85,92,99,106,113,120,127,134,141,148,155,162,169,176]
+
+// for(let j = 0; j<100; j++){
+//  let clone = [...id];
+//  let (let i = 0; i < 6; i++) {
+//    let rand = Math.floor(Math.random()*clone.length+1);
+//    Ui.create({
+//      userId : j+100,
+//      interestId : rand
+//    });
+//    clone.splice(rand, 1);
+//  }
+// }

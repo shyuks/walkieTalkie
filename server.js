@@ -120,7 +120,6 @@ app.post('/login', (req, res) => {
     if (error) {
       res.status(500).send(error);
     } else {
-      console.log('result', result);
       req.session.userId = result.id;
       req.session.userName = result.firstname;
       res.status(200).json(result);

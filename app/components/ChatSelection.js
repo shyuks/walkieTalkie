@@ -90,13 +90,11 @@ handleInterestSearch(){
 
   axios.get('/findCommonUser')
   .then(result => {
-    console.log(result);
-  //   if (!result) {
-  //     console.log('User with common interests are not available, try local chat');
-  //   } else {
-  //     this.props.selectRoom(result.data.roomId);
-  //   }
-  // })
+    if (!result.data) {
+      console.log('User with common interests are not available, try local chat');
+    } else {
+      this.props.selectRoom(result.data);
+    }
   })
   .catch(error => {
     console.log(error);

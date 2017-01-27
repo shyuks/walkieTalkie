@@ -25,12 +25,10 @@ class ViewNavBar extends Component {
   render(){
   return (
   <Navbar inverse collapseOnSelect>
-  <Navbar.Header>
-  </Navbar.Header>
-    <Nav>
+      {this.props.userId ?
+      <Nav>
       <NavItem onClick={this.props.logout}>Logout</NavItem>
       <NavItem onClick={this.props.home}>Home</NavItem>
-      {this.props.userId ?
       <NavItem onClick={this.toggleModal}>Interest
       <Col xs={12} md={12}>
 
@@ -45,14 +43,13 @@ class ViewNavBar extends Component {
       </Col>
 
       </NavItem>
+       </Nav>
       :
       <NavItem></NavItem>
       }
-    </Nav>
   </Navbar>
   )
   }
 }
-
 
 export default ViewNavBar;

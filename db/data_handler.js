@@ -249,7 +249,7 @@ module.exports.findCommonUser = (user, cb) => {
       if (res1.length === 0) {
         cb(false, false);
       } else {
-        db.query('select interestId from UserInterest where userId = ?',
+        db.query('select interestId from UserInterests where userId = ?',
         {replacements : [user], type : sequelize.QueryTypes.SELECT})
         .then(foundInterests => {
 
@@ -258,7 +258,7 @@ module.exports.findCommonUser = (user, cb) => {
           res1.forEach(id => {roomsIds.push(id['roomId'])});
           foundInterests.forEach(interest => {interestIds.push(interest['interestId'])});
 
-          db.query('select UI.userId AS User, AU.roomId AS Room, count(*) AS Total_Match from ActiveUsers AU join UserInterests UI on UI.userId = AU.userId where UI.interestId in (?) AU.roomId in (?) group by UI.userId, AU.roomId order by Total_Match',
+          db.query('select UI.userId AS User, AU.roomId AS Room, count(*) AS Total_Match from ActiveUsers AU join UserInterests UI on UI.userId = AU.userId where UI.interestId in (?) and AU.roomId in (?) group by UI.userId, AU.roomId order by Total_Match DESC',
           {replacements : [interestIds, roomsIds], type : sequelize.QueryTypes.SELECT})
           .then(foundUsers => {
             if(foundUsers.length===0){
