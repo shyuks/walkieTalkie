@@ -1,10 +1,7 @@
-
 // let sampleData = require('./sampleLocationData.json');
 // let Au = require('./schema/ActiveUsers.js');
 // let i = require('./schema/Interests.js');
 // let Ui = require('./schema/UserInterests.js');
-
-
 
 // Au.destroy({truncate : true})
 //   .then(res => {
@@ -21,7 +18,7 @@
 
 
 // let iI = [
-
+  
 //   'Soccer', 'Basketball', 'Football', 'Baseball', 'Hockey', 
 //   'Beer', 'Wine', 'Tequila', 'Vodka', 'Whiskey', 'Shopping', 'Shoes', 'Style',
 //   'Country', 'Hiphop', 'RnB', 'Jazz', 'EDM', 'Classical', 'Rock', 
