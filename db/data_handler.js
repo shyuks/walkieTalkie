@@ -1,6 +1,7 @@
 let db = require('./config.js')
 let Users = require('./schema/User.js')
 let ActiveUsers = require('./schema/ActiveUsers.js');
+let UserInterests = require('./schema/UserInterests.js');
 let sequelize = require('sequelize')
 let util = require('./util.js')
 let Promise = require('bluebird')
@@ -198,4 +199,45 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
    .catch(error => {
      cb(error);
    })
+}
+
+module.exports.getAllInterests = (cb) => {
+  db.query('select id, Interest from Interests', 
+  {type : sequelize.QueryTypes.SELECT})
+  .then(results => {
+    cb(false, results);
+  })
+  .catch(error => {
+    cb(error);
+  })
+}
+
+module.exports.getUserInterests = (inputId, cb) => {
+  db.query('select i.id, i.Interest from UserInterests uI join Interests i on uI.interestId = i.id where uI.userId = ?',
+  {replacements : [inputId], type : sequelize.QueryTypes.SELECT})
+  .then(result => {
+    cb(false, result);
+  })
+  .catch(error => {
+    cb(error);
+  })
+}
+
+module.exports.saveUserInterests = (inputId, interests, cb) => {
+  db.query('delete from UserInterests where userId = ?',
+  {replacements : [inputId], type : sequelize.QueryTypes.DELETE})
+  .then(result => {
+    for (var i in interests) {
+      if (interests[i]) {
+        UserInterests.create({
+          userId : inputId,
+          interestId : i
+        })
+      }
+    }
+    cb(false, 'Success');
+  })
+  .catch(error => {
+    cb(error);
+  })
 }

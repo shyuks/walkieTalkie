@@ -1,17 +1,54 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap';
 import { NavItem } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import UserInterests from './UserInterests'
 
-let ViewNavBar = ({logout, home}) => (
+class ViewNavBar extends Component {
+  constructor(props){
+    super(props)
+    this.state = {
+      show : false
+    }
+    this.toggleModal = this.toggleModal.bind(this);
+  }
+
+  toggleModal(){
+    this.setState({
+      show : !this.state.show
+    })
+  }
+
+  render(){
+  return (
   <Navbar inverse collapseOnSelect>
   <Navbar.Header>
   </Navbar.Header>
     <Nav>
-      <NavItem onClick={()=>logout()}>Logout</NavItem>
-      <NavItem onClick={()=>home()}>Home</NavItem>
+      <NavItem onClick={this.props.logout}>Logout</NavItem>
+      <NavItem onClick={this.props.home}>Home</NavItem>
+      {this.props.userId ?
+      <NavItem onClick={this.toggleModal}>Interest
+        <Modal show={this.state.show} dialogClassName="custom-modal">
+        <Modal.Header>
+            <Modal.Title id="contained-modal-title-lg">You Interests</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <UserInterests user={this.props.userId} toggleModal={this.toggleModal}/>
+          </Modal.Body>
+        </Modal>
+      </NavItem>
+      :
+      <NavItem></NavItem>
+      }
     </Nav>
   </Navbar>
-)
+  )
+  }
+}
+
 
 export default ViewNavBar;

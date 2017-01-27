@@ -120,11 +120,11 @@ class SignUp extends Component {
                 </Col>
                 </FormGroup>
                 </Form>
-                <Col smOffset={2} sm={10}>
-                <Button onClick={()=>this.props.handleView()}>
-                Login
-                </Button>
-                </Col>
+          </Col>
+            <Col smOffset={2} sm={10}>
+              <Button onClick={()=>this.props.handleView()}>
+              Login
+              </Button>
           </Col>
         </Row>
       </Grid>

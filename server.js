@@ -5,6 +5,9 @@ var path = require('path')
 var database = require('./db/config.js')
 var Users = require('./db/schema/User.js')
 var ActiveUsers = require('./db/schema/ActiveUsers.js')
+var Interest = require('./db/schema/Interests.js')
+var UserInterests = require('./db/schema/UserInterests.js')
+var PrivateUsers = require('./db/schema/PrivateUsers.js')
 var dataHandler = require('./db/data_handler.js')
 var http = require('http');
 var socketIo = require('socket.io');
@@ -36,6 +39,25 @@ app.get('/checkSession', (req, res) => {
   res.status(200).send({id : req.session.userId, roomId : req.session.roomId, firstname : req.session.userName});
 });
 
+app.get('/getAvailableInterests', (req, res) => {
+  dataHandler.getAllInterests((error, result) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      res.status(200).json(result);
+    }
+  })
+})
+
+app.get('/getUserInterest', (req, res) => {
+  dataHandler.getUserInterests(req.query.id, (error, result) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      res.status(200).json(result);
+    }
+  })
+})
 
 app.get('/findGlobalRoom', (req, res) => {
   dataHandler.createSession(req.session.userId, req.query.latitude, req.query.longitude)
@@ -102,7 +124,7 @@ app.post('/logout', (req, res) => {
       res.status(500).send(error);
     } else {
       req.session.destroy();
-      res.status(200).send('Logout successfull');
+      res.status(200).send('Logout successful');
     }
   })
 })
@@ -113,7 +135,17 @@ app.post('/exitChat', (req, res) => {
       res.status(500).send(error);
     } else {
       req.session.roomId = null;
-      res.status(200).send('Exit Successfull')
+      res.status(200).send('Exit Successful')
+    }
+  })
+})
+
+app.post('/saveInterest', (req, res) => {
+  dataHandler.saveUserInterests(req.session.userId, req.body, (error, result) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      res.status(200).send('Save Successful')
     }
   })
 })
@@ -128,7 +160,8 @@ io.on('connection', socket => {
     console.log('sending message in room ::::: ', message.room);
     socket.broadcast.in(message.room).emit('message', {
       body: message.body,
-      from: message.from
+      from: message.from,
+      user: message.user
     })
   })
 })
@@ -143,4 +176,3 @@ database.sync()
   .catch(error => {
     console.log('Database did not sync: ', error)
   })
-

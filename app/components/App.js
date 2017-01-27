@@ -107,7 +107,7 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit} map={this.handleMapView}/>
+        <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit} userId={this.state.userId}/>
        {
          this.state.mounted ? 
          (this.state.login_signup_view ? 
