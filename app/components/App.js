@@ -107,11 +107,12 @@ class App extends React.Component {
 
  handleRoomChange(newRoom) {
    this.setState({
-     roomId: newRoom
+     roomId : newRoom,
    })
  }
 
   render() {
+    console.log('rendering app');
     return (
       <div>
         <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit} userId={this.state.userId}/>

@@ -14,6 +14,7 @@ var socketIo = require('socket.io');
 var port = 3000
 
 var app = express()
+// app.locals['activeSocket'] = {}
 //need to create server for socket.io
 var server = http.createServer(app);
 var io = socketIo(server);
@@ -128,7 +129,7 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  dataHandler.userLogout(req.body.id, error => {
+  dataHandler.userLogout(req.session.userId, error => {
     if (error) {
       res.status(500).send(error);
     } else {
@@ -139,7 +140,7 @@ app.post('/logout', (req, res) => {
 })
 
 app.post('/exitChat', (req, res) => {
-  dataHandler.exitRoom(req.body.id, error => {
+  dataHandler.exitRoom(req.session.userId, error => {
     if (error) {
       res.status(500).send(error);
     } else {
@@ -160,49 +161,68 @@ app.post('/saveInterest', (req, res) => {
   })
 })
 
-app.post('/saveInterest', (req, res) => {
-  dataHandler.saveUserInterests(req.session.userId, req.body, (error, result) => {
-    if (error) {
-      res.status(500).send(error);
+app.post('/privateRoom', (req, res) => {
+  dataHandler.userLogout(req.session.userId, (err) => {
+    if(err) {
+      res.status(500).send(err);
     } else {
-      res.status(200).send('Save Successful')
+      req.session.roomId = req.body.id;
+      res.status(200).send('New private room created')
     }
   })
-})
+});
 
-app.post('/privateRoom', (req, res) => {
-  req.session.roomId = req.body.id;
-  res.status(200).send('New private room created')
-})
-
+//listening for socket connection from client
 io.on('connection', socket => {
   console.log('sockets connected');
+
+  //listening for and joining room
   socket.on('join room', room => {
     console.log('joining room ', room);
     socket.join(room);
   })
+
+  //listening for incoming messages
   socket.on('message', message => {
     console.log('you are sending the message to room: ', message.room);
-    socket.broadcast.in(message.room).emit('message', {
+    //broadcasting messages to everyone except sender
+    socket.broadcast.to(message.room).emit('message', {
       body: message.body,
       from: message.from,
       user: message.user,
       socketId: message.socketId
     })
   })
+
+  //listening for a private chat request from client
   socket.on('privateRequest', pcData => {
+    //relaying the private chat request to recipient
     socket.broadcast.to(pcData.receiver).emit('requestModal', pcData)
   })
+
+  //listening for an acceptance from receiver of private chat request
   socket.on('acceptedRequest', pcData => {
+    //replying to sender that the recipient has accepted the request
     socket.broadcast.to(pcData.sender).emit('join private', pcData)
   })
+
+  //listening for a request to leave current room
   socket.on('leaveRoom', room => {
     console.log("leaving room ", room);
+    //leaving current room
     socket.leave(room);
   })
+
+  //listening for a declined private chat request
   socket.on('declineRequest', pcData => {
+    //replying to sender that the request has been declined
     socket.broadcast.to(pcData.sender).emit('declined', pcData)
   })
+  // console.log('this is the object keys: ', Object.keys(io.sockets.sockets));
+  // socket.on('disconnect', () => {
+  //   console.log('this is this in disconnect: ', this)
+  //   console.log('this is the this.id in disconnect: ', this.id);
+  // })
 })
 
 database.sync()
