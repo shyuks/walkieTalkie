@@ -107,7 +107,6 @@ app.get('/findLocalRoom', (req, res) => {
 
 app.get('/findCommonUser', (req, res) => {
   dataHandler.getUserInterests(req.session.userId, (error, result) => {
-    console.log(result);
     if (error) {
       res.status(500).send(error);
     } else if (result.length === 0) {
