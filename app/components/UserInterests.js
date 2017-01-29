@@ -5,9 +5,8 @@ import { Grid } from 'react-bootstrap';
 import { Row } from 'react-bootstrap';
 import { FormGroup } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
-
 import { Col } from 'react-bootstrap';
-
+import { Modal } from 'react-bootstrap';
 
 class UserInterests extends Component {
   constructor(props){
@@ -64,38 +63,28 @@ class UserInterests extends Component {
 
   render (){
     return (
-        <Grid>
-            <Row>            
-
-              {
-                this.state.mounted ? 
-                (        
-                  <Col xs={7} md={7}>
-                  <FormGroup >
-
-                { 
-                this.state.allInterests.map(interest => {
-                  return <AvailableInterests
-                          key = {interest.id}
-                          checked = {this.state.selectedInterest[interest.id]} 
-                          interest = {interest} 
-                          toggleInterest = {this.handleInterestSelection}
-                          />
-                }) 
-                }
-                </FormGroup>
-                <Col xs={6} md={6}>
-                <Button onClick={this.handleSaveInterest}>Save</Button>
-                </Col>
-                <Col xs={6} md={6}>
-                <Button onClick={this.props.toggleModal}>Cancel</Button>
-                </Col>
-                </Col>
-                )
-                : <div></div>
-              }
-            </Row>
-          </Grid>
+      this.state.mounted ? (     
+        <Modal show={this.props.show} dialogClassName="custom-modal">
+          <Modal.Header>
+            <Modal.Title id="contained-modal-title-lg">Your Interests</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          { 
+            this.state.allInterests.map(interest => {
+              return <AvailableInterests
+                      key = {interest.id}
+                      checked = {this.state.selectedInterest[interest.id]} 
+                      interest = {interest} 
+                      toggleInterest = {this.handleInterestSelection}/>
+            }) 
+          }
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.handleSaveInterest}>Save</Button>
+            <Button onClick={this.props.toggleModal}>Cancel</Button>
+          </Modal.Footer>
+        </Modal>
+      ) : (<div></div>)
     )
   }
 }

@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
+import Loading from 'react-loading';
 
 class ChatSelection extends Component {
   constructor(props){
     super(props)
+    this.state = {
+      loading : false
+    }
     this.handleGlobalSearch = this.handleGlobalSearch.bind(this);
     this.handleLocalSearch = this.handleLocalSearch.bind(this);
     this.handleUserLocation = this.handleUserLocation.bind(this);
@@ -13,6 +17,11 @@ class ChatSelection extends Component {
 
 handleUserLocation(e, selection){
   e.preventDefault();
+
+  this.setState({
+    loading : true
+  })
+
   let options = {
     enableHighAccuracy : true,
     timeout : 5000,
@@ -74,6 +83,9 @@ handleLocalSearch(lat, long){
 }
 
 handleInterestSearch(){
+  this.setState({
+    loading : true
+  })
   axios.get('/findCommonUser')
   .then(result => {
     if (!result.data) {
@@ -88,15 +100,21 @@ handleInterestSearch(){
 }
 
   render() {
-    const wellStyles = {maxWidth: 500, margin: '0 auto 10px'};
+    const wellStylesOne = {maxWidth: 500, height: 450, margin: '0 auto 10px'};
+    const wellStyles = {maxWidth : 500, margin: '0 auto 10px'};
     const buttonsInstance = (
     <div className="well" style={wellStyles}>
-      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Global Chat</Button>
-      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Local Chat</Button>
-      <Button bsSize="large" block onClick={this.handleInterestSearch}>Interest Chat</Button>
+      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Join Random Room</Button>
+      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Join Nearest User</Button>
+      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={this.handleInterestSearch}>Join Similar User</Button>
     </div>
     );
-    return buttonsInstance;
+    
+    return this.state.loading ? 
+    <div className="well" style={wellStylesOne}>
+    <Loading className="load" type="cylon" color="#001f3f" height={450} width={450} delay={0}/> 
+    </div>
+    :buttonsInstance;
   }
 }
 
