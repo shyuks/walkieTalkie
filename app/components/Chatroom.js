@@ -6,6 +6,8 @@ import axios from 'axios';
 import { Modal } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Alert } from 'react-bootstrap';
+import { FormGroup } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 
 class Chatroom extends Component {
   constructor(props){
@@ -164,7 +166,8 @@ class Chatroom extends Component {
 
   render(){
     var messages = this.state.messages
-    const wellStylesOne = {maxWidth: 500, height: 450, margin: '0 auto 10px'};
+    const wellStylesOne = {maxWidth: 400, height: 500, margin: '0 auto 10px'};
+    const wellStyleTwo = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
 
       return (
       <div>
@@ -189,6 +192,7 @@ class Chatroom extends Component {
           </Modal.Body>
         </Modal>
 
+        
         <div className="well" style={wellStylesOne}>
         {messages.map((message, index) =>
           <ul key={index}>
@@ -198,7 +202,9 @@ class Chatroom extends Component {
           </ul>
         )}
         </div>
-        <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+        <div className="well" style={wellStyleTwo}>
+        <input type="text" style={{width : 350}} placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+        </div>
         <div>
         {
           this.props.searchResults ? 

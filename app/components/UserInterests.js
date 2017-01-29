@@ -64,8 +64,8 @@ class UserInterests extends Component {
   render (){
     return (
       this.state.mounted ? (     
-        <Modal show={this.props.show} dialogClassName="custom-modal">
-          <Modal.Header>
+        <Modal show={this.props.show} onHide={this.props.toggleModal} dialogClassName="custom-modal">
+          <Modal.Header closeButton>
             <Modal.Title id="contained-modal-title-lg">Your Interests</Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -81,7 +81,6 @@ class UserInterests extends Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.handleSaveInterest}>Save</Button>
-            <Button onClick={this.props.toggleModal}>Cancel</Button>
           </Modal.Footer>
         </Modal>
       ) : (<div></div>)

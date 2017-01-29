@@ -2,17 +2,21 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import Loading from 'react-loading';
+import { Modal } from 'react-bootstrap';
 
 class ChatSelection extends Component {
   constructor(props){
     super(props)
     this.state = {
-      loading : false
+      loading : false,
+      show : false,
+      message : ''
     }
     this.handleGlobalSearch = this.handleGlobalSearch.bind(this);
     this.handleLocalSearch = this.handleLocalSearch.bind(this);
     this.handleUserLocation = this.handleUserLocation.bind(this);
     this.handleInterestSearch = this.handleInterestSearch.bind(this);
+    this.handleClose = this.handleClose.bind(this);
   }
 
 handleUserLocation(e, selection){
@@ -84,12 +88,23 @@ handleLocalSearch(lat, long){
 
 handleInterestSearch(){
   this.setState({
+    show : false,
     loading : true
   })
   axios.get('/findCommonUser')
   .then(result => {
     if (!result.data) {
-      console.log('User with common interests are not available, try local chat');
+      this.setState({
+        loading : false,
+        show : true,
+        message : 'Users with common interests are not available, try local chat'
+      })
+    } else if (result.data.hasNoInterests) {
+      this.setState({
+        loading : false,
+        show: true,
+        message : 'You do not have any interests saved!'
+      })
     } else {
       this.props.selectRoom(result.data.roomId, 3, {'interest':result.data.interests});
     }
@@ -99,22 +114,33 @@ handleInterestSearch(){
   })
 }
 
+handleClose(){
+  this.setState({
+    show : false,
+    message : ''
+  })
+}
+
   render() {
-    const wellStylesOne = {maxWidth: 500, height: 450, margin: '0 auto 10px'};
+    const wellStylesOne = {maxWidth: 500, height: 300, margin: '0 auto 10px'};
     const wellStyles = {maxWidth : 500, margin: '0 auto 10px'};
-    const buttonsInstance = (
-    <div className="well" style={wellStyles}>
+
+    return this.state.loading ? 
+    <Loading className="load" type="cylon" color="#001f3f" height={600} width={1200} delay={0}/> 
+    : (
+    <div>
+      <Modal show={this.state.show} onHide={this.handleClose} dialogClassName="custom-modal">
+      <Modal.Header closeButton>
+      <Modal.Title id="contained-modal-title-lg">{this.state.message}</Modal.Title>
+      </Modal.Header>
+      </Modal>
+      <div className="well" style={wellStyles}>
       <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Join Random Room</Button>
       <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Join Nearest User</Button>
       <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={this.handleInterestSearch}>Join Similar User</Button>
+      </div>
     </div>
-    );
-    
-    return this.state.loading ? 
-    <div className="well" style={wellStylesOne}>
-    <Loading className="load" type="cylon" color="#001f3f" height={450} width={450} delay={0}/> 
-    </div>
-    :buttonsInstance;
+    )
   }
 }
 

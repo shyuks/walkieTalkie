@@ -106,13 +106,22 @@ app.get('/findLocalRoom', (req, res) => {
 })
 
 app.get('/findCommonUser', (req, res) => {
-  dataHandler.findCommonUser(req.session.userId, (error, result, commonInterests) => {
+  dataHandler.getUserInterests(req.session.userId, (error, result) => {
+    console.log(result);
     if (error) {
       res.status(500).send(error);
+    } else if (result.length === 0) {
+      res.status(200).json({'hasNoInterests' : true})
     } else {
-      req.session.roomId = result;
-      res.status(200).json({'roomId' : result, 'interests' : commonInterests});
-    } 
+      dataHandler.findCommonUser(req.session.userId, (error, result, commonInterests) => {
+        if (error) {
+          res.status(500).send(error);
+        } else {
+          req.session.roomId = result;
+          res.status(200).json({'roomId' : result, 'interests' : commonInterests});
+        } 
+      })
+    }
   })
 });
 
