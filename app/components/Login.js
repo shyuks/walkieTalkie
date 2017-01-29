@@ -60,7 +60,7 @@ class Login extends Component {
     return (
       <Grid>
         <Row>
-          <Col xs={12} md={12}>
+          <Col xs={6} md={6}>
             <Form horizontal onSubmit={this.handleUserLogin}>
               <FormGroup controlId="formHorizontalEmail">
                 <Col componentClass={ControlLabel}>
@@ -79,20 +79,10 @@ class Login extends Component {
                 </Col>
                 </FormGroup>
                 <FormGroup>
-                <Col >
-                <Button type="submit">
-                Login
-                </Button>
-                </Col>
+                <Button type="submit">Login</Button>
+                <Button onClick={()=> this.props.handleView()} type="submit">Signup</Button>
                </FormGroup>
                </Form>
-            </Col>
-
-            <Col >
-
-              <Button onClick={()=> this.props.handleView()} type="submit">
-              Signup
-              </Button>
             </Col>
         </Row>
       </Grid>
