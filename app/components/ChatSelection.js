@@ -8,6 +8,7 @@ class ChatSelection extends Component {
     this.handleGlobalSearch = this.handleGlobalSearch.bind(this);
     this.handleLocalSearch = this.handleLocalSearch.bind(this);
     this.handleUserLocation = this.handleUserLocation.bind(this);
+    this.handleInterestSearch = this.handleInterestSearch.bind(this);
   }
 
 handleUserLocation(e, selection){
@@ -85,12 +86,28 @@ handleLocalSearch(lat, long){
 
 }
 
+handleInterestSearch(){
+
+  axios.get('/findCommonUser')
+  .then(result => {
+    if (!result.data) {
+      console.log('User with common interests are not available, try local chat');
+    } else {
+      this.props.selectRoom(result.data);
+    }
+  })
+  .catch(error => {
+    console.log(error);
+  })
+}
+
   render() {
     const wellStyles = {maxWidth: 500, margin: '0 auto 10px'};
     const buttonsInstance = (
     <div className="well" style={wellStyles}>
       <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Global Chat</Button>
       <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Local Chat</Button>
+      <Button bsSize="large" block onClick={this.handleInterestSearch}>Interest Chat</Button>
     </div>
     );
     return buttonsInstance;

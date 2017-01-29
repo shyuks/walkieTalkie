@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import UserLoginSignup from './Login_Signup.js';
+import LoginSignupView from './LoginSignupView.js';
 import ViewNavBar from './ViewNavbar.js';
 import Chatroom from './Chatroom.js';
 import ChatSelection from './ChatSelection.js';
@@ -14,7 +14,6 @@ class App extends React.Component {
       roomId : null,
       login_signup_view : true,
       chat_view : false,
-      map_view : false,
       mounted : false
     }
     this.componentWillMount = this.componentWillMount.bind(this);
@@ -22,7 +21,7 @@ class App extends React.Component {
     this.handleUserLogout = this.handleUserLogout.bind(this);
     this.handleChatSelection = this.handleChatSelection.bind(this);
     this.handleChatExit = this.handleChatExit.bind(this);
-    this.handleMapView = this.handleMapView.bind(this);
+    this.handleRoomChange = this.handleRoomChange.bind(this);
   }
 
   componentWillMount(){
@@ -106,27 +105,24 @@ class App extends React.Component {
    }
  }
 
- handleMapView(){
-   axios.get('/showMap')
-   .then(result => {
-
-   })
-   .catch(error => {
-     console.log(error);
+ handleRoomChange(newRoom) {
+   this.setState({
+     roomId : newRoom,
    })
  }
 
   render() {
+    console.log('rendering app');
     return (
       <div>
-        <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit} map={this.handleMapView}/>
+        <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit} userId={this.state.userId}/>
        {
          this.state.mounted ? 
          (this.state.login_signup_view ? 
-         (<UserLoginSignup userSignupLogin={this.handleUserSignupLogin}/>) :
-         (this.state.chat_view ? <Chatroom userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
+         (<LoginSignupView userSignupLogin={this.handleUserSignupLogin}/>) :
+         (this.state.chat_view ? <Chatroom roomChange={this.handleRoomChange} userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
          : < ChatSelection selectRoom={this.handleChatSelection}/>))  
-         :(<div>Loading Page</div>)
+         :(<div></div>)
        }
       </div>
     )

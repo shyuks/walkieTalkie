@@ -1,6 +1,7 @@
 let db = require('./config.js')
 let Users = require('./schema/User.js')
 let ActiveUsers = require('./schema/ActiveUsers.js');
+let UserInterests = require('./schema/UserInterests.js');
 let sequelize = require('sequelize')
 let util = require('./util.js')
 let Promise = require('bluebird')
@@ -198,4 +199,93 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
    .catch(error => {
      cb(error);
    })
+}
+
+module.exports.getAllInterests = (cb) => {
+  db.query('select id, Interest from Interests', 
+  {type : sequelize.QueryTypes.SELECT})
+  .then(results => {
+    cb(false, results);
+  })
+  .catch(error => {
+    cb(error);
+  })
+}
+
+module.exports.getUserInterests = (inputId, cb) => {
+  db.query('select i.id, i.Interest from UserInterests uI join Interests i on uI.interestId = i.id where uI.userId = ?',
+  {replacements : [inputId], type : sequelize.QueryTypes.SELECT})
+  .then(result => {
+    cb(false, result);
+  })
+  .catch(error => {
+    cb(error);
+  })
+}
+
+module.exports.saveUserInterests = (inputId, interests, cb) => {
+  db.query('delete from UserInterests where userId = ?',
+  {replacements : [inputId], type : sequelize.QueryTypes.DELETE})
+  .then(result => {
+    for (var i in interests) {
+      if (interests[i]) {
+        UserInterests.create({
+          userId : inputId,
+          interestId : i
+        })
+      }
+    }
+    cb(false, 'Success');
+  })
+  .catch(error => {
+    cb(error);
+  })
+
+}
+
+module.exports.findCommonUser = (user, cb) => {
+  db.query('select roomId from ActiveUsers where roomId != 0 group by roomId having count(roomId) < 10', 
+    {type : sequelize.QueryTypes.SELECT})
+    .then(res1 => {
+      if (res1.length === 0) {
+        cb(false, false);
+      } else {
+        db.query('select interestId from UserInterests where userId = ?',
+        {replacements : [user], type : sequelize.QueryTypes.SELECT})
+        .then(foundInterests => {
+
+          let roomsIds = [];
+          let interestIds = [];
+          res1.forEach(id => {roomsIds.push(id['roomId'])});
+          foundInterests.forEach(interest => {interestIds.push(interest['interestId'])});
+
+          db.query('select UI.userId AS User, AU.roomId AS Room, count(*) AS Total_Match from ActiveUsers AU join UserInterests UI on UI.userId = AU.userId where UI.interestId in (?) and AU.roomId in (?) group by UI.userId, AU.roomId order by Total_Match DESC',
+          {replacements : [interestIds, roomsIds], type : sequelize.QueryTypes.SELECT})
+          .then(foundUsers => {
+            if(foundUsers.length===0){
+              cb(false, false)
+            } else {
+              db.query('update ActiveUsers set roomId = ? where userId = ?',
+              {replacements : [foundUsers[0]['Room'], user], type : sequelize.QueryTypes.UPDATE})
+              .then(updatedUser => {
+                cb(false, foundUsers[0]['Room']);
+              })
+              .catch(error => {
+                cb(error)
+              })
+            }
+          })
+          .catch(error => {
+            cb(error);
+          })
+        })
+        .catch(error => {
+          cb(error)
+        })
+      }
+    })
+    .catch(error => {
+      cb(error)
+    })
+
 }
