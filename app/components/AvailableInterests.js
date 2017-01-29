@@ -31,5 +31,4 @@ class AvailableInterests extends Component {
   }
 }
 
-
 export default AvailableInterests;

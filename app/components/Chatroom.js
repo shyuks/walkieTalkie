@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ChatLine from './ChatLineItem';
+import ChatJoinModal from './ChatJoinModal.js'
 import io from 'socket.io-client';
 import axios from 'axios';
 import { Modal } from 'react-bootstrap';
@@ -160,6 +161,8 @@ class Chatroom extends Component {
   };
 
   render(){
+
+    if (this.prop)
     var messages = this.state.messages.map((message, index) => {
       return <ul key={index}><ChatLine message={message} privateChat={this.handlePrivateChat}/></ul>
     })
@@ -189,7 +192,15 @@ class Chatroom extends Component {
 
         {messages}
         <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
-
+        <div>
+        {
+          this.props.searchResults ? 
+          (
+            <ChatJoinModal searchResults={this.props.searchResults}/>
+          ) :
+          <div></div>
+        }
+        </div>
       </div>
     )
     }

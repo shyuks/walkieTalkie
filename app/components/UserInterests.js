@@ -70,7 +70,7 @@ class UserInterests extends Component {
               {
                 this.state.mounted ? 
                 (        
-                  <Col xs={8} md={8}>
+                  <Col xs={7} md={7}>
                   <FormGroup >
 
                 { 
@@ -83,7 +83,6 @@ class UserInterests extends Component {
                           />
                 }) 
                 }
-
                 </FormGroup>
                 <Col xs={6} md={6}>
                 <Button onClick={this.handleSaveInterest}>Save</Button>

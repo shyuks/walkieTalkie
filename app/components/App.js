@@ -12,6 +12,7 @@ class App extends React.Component {
       userId : null,
       name : null,
       roomId : null,
+      roomSearch : null,
       login_signup_view : true,
       chat_view : false,
       mounted : false
@@ -81,9 +82,10 @@ class App extends React.Component {
    })
  }
 
- handleChatSelection(inputRoomId){
+ handleChatSelection(inputRoomId, searchOptions, result){
    this.setState({
      roomId : inputRoomId,
+     roomSearch : {'option' : searchOptions, 'res' : result},
      chat_view : true,
      map_view : false
    })
@@ -112,16 +114,21 @@ class App extends React.Component {
  }
 
   render() {
-    console.log('rendering app');
     return (
       <div>
-        <ViewNavBar logout={this.handleUserLogout} home={this.handleChatExit} userId={this.state.userId}/>
+        <ViewNavBar logout = {this.handleUserLogout} 
+                    home = {this.handleChatExit} 
+                    userId = {this.state.userId}/>
        {
          this.state.mounted ? 
          (this.state.login_signup_view ? 
-         (<LoginSignupView userSignupLogin={this.handleUserSignupLogin}/>) :
-         (this.state.chat_view ? <Chatroom roomChange={this.handleRoomChange} userId={this.state.userId} roomId={this.state.roomId} name={this.state.name}/> 
-         : < ChatSelection selectRoom={this.handleChatSelection}/>))  
+         (<LoginSignupView userSignupLogin = {this.handleUserSignupLogin}/>) :
+         (this.state.chat_view ? <Chatroom roomChange = {this.handleRoomChange} 
+                                           userId = {this.state.userId} 
+                                           roomId = {this.state.roomId} 
+                                           name = {this.state.name} 
+                                           searchResults = {this.state.roomSearch}/> 
+         : < ChatSelection selectRoom = {this.handleChatSelection}/>))  
          :(<div></div>)
        }
       </div>

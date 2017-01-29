@@ -40,6 +40,17 @@ app.get('/checkSession', (req, res) => {
   res.status(200).send({id : req.session.userId, roomId : req.session.roomId, firstname : req.session.userName});
 });
 
+app.get('/getActiveUsers', (req, res) => {
+  dataHandler.getActiveUsers(req.query.roomId, (error, result) => {
+    if (error) {
+      res.status(500).send(error);
+    } else {
+      console.log(result);
+      res.status(200).json(result);
+    }
+  })
+})
+
 app.get('/getAvailableInterests', (req, res) => {
   dataHandler.getAllInterests((error, result) => {
     if (error) {
@@ -95,11 +106,12 @@ app.get('/findLocalRoom', (req, res) => {
 })
 
 app.get('/findCommonUser', (req, res) => {
-  dataHandler.findCommonUser(req.session.userId, (error, result) => {
+  dataHandler.findCommonUser(req.session.userId, (error, result, commonInterests) => {
     if (error) {
       res.status(500).send(error);
     } else {
-      res.status(200).json(result);
+      req.session.roomId = result;
+      res.status(200).json({'roomId' : result, 'interests' : commonInterests});
     } 
   })
 });
