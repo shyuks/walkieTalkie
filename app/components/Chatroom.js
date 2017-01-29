@@ -166,7 +166,7 @@ class Chatroom extends Component {
 
   render(){
     var messages = this.state.messages
-    const wellStylesOne = {maxWidth: 400, height: 500, margin: '0 auto 10px'};
+    const wellStylesOne = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
     const wellStyleTwo = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
 
       return (
