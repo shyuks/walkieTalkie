@@ -166,7 +166,9 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
           cb(error);
         })
      } else {
+
        let roomsIds = [];
+
        res1.forEach(id => {roomsIds.push(id['roomId'])});
        db.query('select latitude, longitude, roomId from ActiveUsers where roomId in (?)',
         {replacements : [roomsIds], type : sequelize.QueryTypes.SELECT})
@@ -182,6 +184,7 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
               shortestPoint = res4[i]['roomId'];
             }
           }
+
           db.query('update ActiveUsers set roomId = ? where userId = ?',
           {replacements : [shortestPoint, user], type : sequelize.QueryTypes.UPDATE})
           .then(res5 => {
@@ -240,7 +243,6 @@ module.exports.saveUserInterests = (inputId, interests, cb) => {
   .catch(error => {
     cb(error);
   })
-
 }
 
 module.exports.findCommonUser = (user, cb) => {
@@ -268,7 +270,14 @@ module.exports.findCommonUser = (user, cb) => {
               db.query('update ActiveUsers set roomId = ? where userId = ?',
               {replacements : [foundUsers[0]['Room'], user], type : sequelize.QueryTypes.UPDATE})
               .then(updatedUser => {
-                cb(false, foundUsers[0]['Room']);
+                db.query('select interest from Interests i join UserInterests ui on i.id = ui.interestId where ui.interestId in (?) and ui.userId = ?',
+                {replacements : [interestIds, foundUsers[0]['User']], type : sequelize.QueryTypes.SELECT})
+                .then(commonInterests => {
+                  cb(false, foundUsers[0]['Room'], commonInterests);
+                })
+                .catch(error => {
+                  cbb(error);
+                })
               })
               .catch(error => {
                 cb(error)
@@ -287,5 +296,15 @@ module.exports.findCommonUser = (user, cb) => {
     .catch(error => {
       cb(error)
     })
+}
 
+module.exports.getActiveUsers = (inputRoomId, cb) => {
+  db.query('select u.firstname, u.id from Users u join ActiveUsers au on u.id = au.userId where au.roomId = ?',
+  {replacements : [inputRoomId], type : sequelize.QueryTypes.SELECT})
+  .then(userList => {
+    cb(false, userList);
+  })
+  .catch(error => {
+    cb(error);
+  })
 }

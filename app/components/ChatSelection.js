@@ -12,9 +12,7 @@ class ChatSelection extends Component {
   }
 
 handleUserLocation(e, selection){
-
   e.preventDefault();
-
   let options = {
     enableHighAccuracy : true,
     timeout : 5000,
@@ -45,7 +43,6 @@ handleUserLocation(e, selection){
 }
 
 handleGlobalSearch(lat, long){
-
   axios.get('/findGlobalRoom', {
     params : {
       latitude : lat,
@@ -53,10 +50,7 @@ handleGlobalSearch(lat, long){
     }
   })
   .then(res => {
-    if (res.data.host) {
-      console.log('No rooms available, you are the host.');
-    }
-    this.props.selectRoom(res.data.roomId);
+    this.props.selectRoom(res.data.roomId, 1, {'host' : res.data.host});
   })
   .catch(error => {
     console.log(error);
@@ -65,7 +59,6 @@ handleGlobalSearch(lat, long){
 }
 
 handleLocalSearch(lat, long){
-
   axios.get('/findLocalRoom', {
     params : {
       latitude : lat,
@@ -73,27 +66,20 @@ handleLocalSearch(lat, long){
     }
   })
   .then(res => {
-    if (res.data.host) {
-      console.log('No rooms available, you are the host.');
-    } else {
-      console.log(`Closest user found is ${res.data.distance} miles away.`);
-    }
-    this.props.selectRoom(res.data.roomId);
+    this.props.selectRoom(res.data.roomId, 2, {'host' : res.data.host, 'distance' : res.data.distance});
   })
   .catch(error => {
     console.log(error);
   })
-
 }
 
 handleInterestSearch(){
-
   axios.get('/findCommonUser')
   .then(result => {
     if (!result.data) {
       console.log('User with common interests are not available, try local chat');
     } else {
-      this.props.selectRoom(result.data);
+      this.props.selectRoom(result.data.roomId, 3, {'interest':result.data.interests});
     }
   })
   .catch(error => {

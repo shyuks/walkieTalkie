@@ -5,6 +5,7 @@ import { NavItem } from 'react-bootstrap';
 import { Col } from 'react-bootstrap';
 import { Modal } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 import UserInterests from './UserInterests'
 
 class ViewNavBar extends Component {
@@ -26,12 +27,11 @@ class ViewNavBar extends Component {
   return (
   <Navbar inverse collapseOnSelect>
       {this.props.userId ?
+        <div>
       <Nav>
-      <NavItem onClick={this.props.logout}>Logout</NavItem>
       <NavItem onClick={this.props.home}>Home</NavItem>
       <NavItem onClick={this.toggleModal}>Interest
       <Col xs={12} md={12}>
-
         <Modal show={this.state.show} dialogClassName="custom-modal">
         <Modal.Header>
             <Modal.Title id="contained-modal-title-lg">You Interests</Modal.Title>
@@ -40,11 +40,13 @@ class ViewNavBar extends Component {
             <UserInterests user={this.props.userId} toggleModal={this.toggleModal}/>
           </Modal.Body>
         </Modal>
-
       </Col>
-
       </NavItem>
        </Nav>
+       <Nav pullRight>
+       <NavItem onClick={this.props.logout}>Logout</NavItem>
+       </Nav>
+       </div>
       :
       <NavItem></NavItem>
       }
