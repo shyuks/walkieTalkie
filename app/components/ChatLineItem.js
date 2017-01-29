@@ -8,7 +8,7 @@ class ChatLineItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      interests: ['test', 'sean']
+      interests: []
     }
   //bind all functions here
   this.handleUsernameClick = this.handleUsernameClick.bind(this);
