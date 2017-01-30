@@ -69,7 +69,6 @@ handleGlobalSearch(lat, long){
   .catch(error => {
     console.log(error);
   })
-
 }
 
 handleLocalSearch(lat, long){
@@ -128,20 +127,21 @@ handleClose(){
     return (
     <div>
       <Modal show={this.state.show} onHide={this.handleClose} dialogClassName="custom-modal">
-      <Modal.Header closeButton>
-      <Modal.Title id="contained-modal-title-lg">{this.state.message}</Modal.Title>
-      </Modal.Header>
+        <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-lg">{this.state.message}</Modal.Title>
+        </Modal.Header>
       </Modal>
       <div>
-      { this.state.loading ?
+    {this.state.loading ?
       <Col style={loadingCol}>
-      <Loading type="bars" color="#001f3f" width={500} heigth={500} delay={0}/> </Col>:(
-      <div className="well" style={chatSelectionWell}>
-      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Join Random Room</Button>
-      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Join Nearest User</Button>
-      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={this.handleInterestSearch}>Join Similar User</Button>
-      </div>)
-      }
+      <Loading type="bars" color="#001f3f" width={500} heigth={500} delay={0}/> </Col> : 
+      (
+        <div className="well" style={chatSelectionWell}>
+        <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Join Random Room</Button>
+        <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Join Nearest User</Button>
+        <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={this.handleInterestSearch}>Join Similar User</Button>
+        </div>)
+    }
       </div>
     </div>
     )

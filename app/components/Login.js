@@ -6,13 +6,15 @@ import { Form } from 'react-bootstrap';
 import { FormGroup } from 'react-bootstrap';
 import { FormControl } from 'react-bootstrap';
 import { ControlLabel } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap';
 
 class Login extends Component {
   constructor(props){
     super(props)
     this.state = {
       loginEmail : '',
-      loginPassword: ''
+      loginPassword: '',
+      invalidLogin: false,
     }
     this.handleUserLogin = this.handleUserLogin.bind(this);
     this.handleLoginEmail = this.handleLoginEmail.bind(this);
@@ -43,10 +45,12 @@ class Login extends Component {
 
     axios.post('/login', userInfo)
     .then(result => {
-      if (result) {
-        self.props.userSignupLogin(result.data);
+      if (result.data.invalid) {
+      this.setState({
+        invalidLogin : true
+      })
       } else {
-        console.log('Incorrect Email or Password');
+        self.props.userSignupLogin(result.data);
       }
     })
     .catch(err => {
@@ -55,32 +59,43 @@ class Login extends Component {
   }
 
   render(){
-    const loginWellStyle={maxWidth: 500,margin: '0 auto 10px'};
+    const loginWellStyle={maxWidth: 500, margin: '0 auto 10px'};
+
+    const alertInstance = (
+      <Alert className="loginSignupAlert" bsStyle="warning">
+        Password/Email combination does not match.
+      </Alert>
+    )
     return (
-          <Col className="well" style={loginWellStyle}>
-            <Form horizontal onSubmit={this.handleUserLogin}>
-              <FormGroup controlId="formHorizontalEmail">
-                <Col componentClass={ControlLabel}>
-                Email
-                </Col>
-                <Col >
-                <FormControl type="email" placeholder="Email" value={this.state.loginEmail} onChange={this.handleLoginEmail} required={true}/>
-                </Col>
-                </FormGroup>
-                <FormGroup controlId="formHorizontalPassword">
-                <Col componentClass={ControlLabel} >
-                Password
-                </Col>
-                <Col >
-                <FormControl type="password" placeholder="Password" value={this.state.loginPassword} onChange={this.handleLoginPassword} required={true}/>
-                </Col>
-                </FormGroup>
-                <FormGroup>
-                <Button type="submit">Login</Button>
-                <Button onClick={()=> this.props.handleView()} type="submit">Signup</Button>
-               </FormGroup>
-               </Form>
-            </Col>
+      <Col className="well" style={loginWellStyle}>
+        <Form horizontal className="loginForm" onSubmit={this.handleUserLogin}>
+          <FormGroup controlId="formHorizontalEmail">
+              <Col componentClass={ControlLabel}>
+              Email
+              </Col>
+              <Col >
+              <FormControl type="email" placeholder="Email" value={this.state.loginEmail} onChange={this.handleLoginEmail} required={true}/>
+              </Col>
+            </FormGroup>
+
+            <FormGroup controlId="formHorizontalPassword">
+              <Col componentClass={ControlLabel} >
+              Password
+              </Col>
+              <Col >
+              <FormControl type="password" placeholder="Password" value={this.state.loginPassword} onChange={this.handleLoginPassword} required={true}/>
+              </Col>
+            </FormGroup>
+
+            <FormGroup>
+              <Button type="submit" bsStyle="primary">Login</Button>
+              <Button onClick={()=> this.props.handleView()} type="submit">Signup</Button>
+            </FormGroup>
+            </Form>
+            {
+              this.state.invalidLogin ? (alertInstance) : <div></div>
+            }
+        </Col>
     )
   }
 }

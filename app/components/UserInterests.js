@@ -80,7 +80,7 @@ class UserInterests extends Component {
           }
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={this.handleSaveInterest}>Save</Button>
+            <Button bsStyle="primary" onClick={this.handleSaveInterest}>Save</Button>
           </Modal.Footer>
         </Modal>
       ) : (<div></div>)
