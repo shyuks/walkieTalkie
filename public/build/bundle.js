@@ -43094,15 +43094,7 @@
 	                  _react2.default.createElement(
 	                    _reactBootstrap.Col,
 	                    { xs: 2, md: 2 },
-	                    _react2.default.createElement(
-	                      'div',
-	                      null,
-	                      _react2.default.createElement(
-	                        'p',
-	                        null,
-	                        'UserList'
-	                      )
-	                    )
+	                    _react2.default.createElement('div', null)
 	                  ),
 	                  _react2.default.createElement(
 	                    _reactBootstrap.Col,
