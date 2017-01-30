@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import axios from 'axios';
 import InterestsItem from './UserClickInterestsView'
 import { Popover } from 'react-bootstrap';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 
-class ChatLineItem extends Component {
+class UserList extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -47,4 +47,5 @@ class ChatLineItem extends Component {
   }
 }
 
-export default ChatLineItem;
+
+export default UserList

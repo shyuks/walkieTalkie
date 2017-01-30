@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import ChatLine from './ChatLineItem';
+import UserList from './UserList';
 import ChatJoinModal from './ChatJoinModal.js'
 import io from 'socket.io-client';
 import axios from 'axios';
 import { Modal } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Alert } from 'react-bootstrap';
+import { FormGroup } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
+import { Grid } from 'react-bootstrap';
 
 class Chatroom extends Component {
   constructor(props){
@@ -17,7 +21,7 @@ class Chatroom extends Component {
       pcData: {}
     }
     this.handleMessageSubmit = this.handleMessageSubmit.bind(this);
-    this.componentWillMount = this.componentWillMount.bind(this);
+    this.componentDidMount = this.componentDidMount.bind(this);
     this.handlePrivateChat = this.handlePrivateChat.bind(this);
     this.acceptPrivateChat = this.acceptPrivateChat.bind(this);
     this.declinePrivateChat = this.declinePrivateChat.bind(this);
@@ -26,7 +30,7 @@ class Chatroom extends Component {
     this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     //creating a socket connection
     this.socket = io('/');
 
@@ -36,7 +40,7 @@ class Chatroom extends Component {
     //listener for any incoming messages and re-setting the state
     this.socket.on('message', message => {
       this.setState({
-        messages: [message, ...this.state.messages].slice(0, 50)
+        messages: [...this.state.messages, message].slice(0, 50)
       });
     });
 
@@ -57,7 +61,7 @@ class Chatroom extends Component {
     //listener for sender to see their offer has been declined
     this.socket.on('declined', pcData => {
       this.setState({
-        pcData: {},
+        pcData,
         rejected: true
       })
     })
@@ -82,7 +86,7 @@ class Chatroom extends Component {
         socketId: this.socket.json.id
       };
       this.setState({
-        messages: [message, ...this.state.messages].slice(0, 50)
+        messages: [...this.state.messages, message].slice(0, 50)
       });
       //sending message to the server
       this.socket.emit('message', message);
@@ -128,6 +132,7 @@ class Chatroom extends Component {
   declinePrivateChat() {
     this.socket.emit('declineRequest', this.state.pcData);
     this.setState({
+      pcData: {},
       showRequest: false
     });
   };
@@ -156,19 +161,19 @@ class Chatroom extends Component {
   //close rejection modal
   acceptRejection() {
     this.setState({
+      pcData: {},
       rejected: false
     });
   };
 
   render(){
-
-    if (this.prop)
-    var messages = this.state.messages.map((message, index) => {
-      return <ul key={index}><ChatLine message={message} privateChat={this.handlePrivateChat}/></ul>
-    })
+    var messages = this.state.messages
+    const wellStyleOne = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
+    const wellStyleTwo = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
 
       return (
       <div>
+
         <Modal show={this.state.showRequest} dialogClassName="custom-modal">
           <Modal.Header>
             <Modal.Title id="contained-modal-title-lg">Private Chat</Modal.Title>
@@ -189,10 +194,33 @@ class Chatroom extends Component {
             <Button onClick={this.acceptRejection}>OK</Button>
           </Modal.Body>
         </Modal>
+        
+        <Grid>
+          <Col>
+            <div className="well" style={wellStyleOne}>
 
-        {messages}
-        <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+            </div>
+          </Col>
+          
+          <Col>
+
+            <div className="well" style={wellStyleTwo}>
+            {messages.map((message, index) =>
+              <ul key={index}>
+                <ChatLine 
+                  message={message}
+                  privateChat={this.handlePrivateChat}/>
+              </ul>
+            )}
+
+            <input type="text" style={{width : 350}} placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+            </div>
+          </Col>
+        
+        </Grid>
+        
         <div>
+        
         {
           this.props.searchResults ? 
           (
@@ -201,6 +229,7 @@ class Chatroom extends Component {
           <div></div>
         }
         </div>
+
       </div>
     )
     }

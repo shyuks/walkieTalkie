@@ -1,18 +1,32 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
+import Loading from 'react-loading';
+import { Modal } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 
 class ChatSelection extends Component {
   constructor(props){
     super(props)
+    this.state = {
+      loading : false,
+      show : false,
+      message : ''
+    }
     this.handleGlobalSearch = this.handleGlobalSearch.bind(this);
     this.handleLocalSearch = this.handleLocalSearch.bind(this);
     this.handleUserLocation = this.handleUserLocation.bind(this);
     this.handleInterestSearch = this.handleInterestSearch.bind(this);
+    this.handleClose = this.handleClose.bind(this);
   }
 
 handleUserLocation(e, selection){
   e.preventDefault();
+
+  this.setState({
+    loading : true
+  })
+
   let options = {
     enableHighAccuracy : true,
     timeout : 5000,
@@ -74,10 +88,24 @@ handleLocalSearch(lat, long){
 }
 
 handleInterestSearch(){
+  this.setState({
+    show : false,
+    loading : true
+  })
   axios.get('/findCommonUser')
   .then(result => {
     if (!result.data) {
-      console.log('User with common interests are not available, try local chat');
+      this.setState({
+        loading : false,
+        show : true,
+        message : 'Users with common interests are not available, try local chat'
+      })
+    } else if (result.data.hasNoInterests) {
+      this.setState({
+        loading : false,
+        show: true,
+        message : 'You do not have any interests saved!'
+      })
     } else {
       this.props.selectRoom(result.data.roomId, 3, {'interest':result.data.interests});
     }
@@ -87,16 +115,36 @@ handleInterestSearch(){
   })
 }
 
+handleClose(){
+  this.setState({
+    show : false,
+    message : ''
+  })
+}
+
   render() {
-    const wellStyles = {maxWidth: 500, margin: '0 auto 10px'};
-    const buttonsInstance = (
-    <div className="well" style={wellStyles}>
-      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Global Chat</Button>
-      <Button bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Local Chat</Button>
-      <Button bsSize="large" block onClick={this.handleInterestSearch}>Interest Chat</Button>
+    const loadingCol = {maxWidth: 500, margin: '0 auto 10px'};
+    const chatSelectionWell = {maxWidth : 500, margin: '0 auto 10px'};
+    return (
+    <div>
+      <Modal show={this.state.show} onHide={this.handleClose} dialogClassName="custom-modal">
+      <Modal.Header closeButton>
+      <Modal.Title id="contained-modal-title-lg">{this.state.message}</Modal.Title>
+      </Modal.Header>
+      </Modal>
+      <div>
+      { this.state.loading ?
+      <Col style={loadingCol}>
+      <Loading type="bars" color="#001f3f" width={500} heigth={500} delay={0}/> </Col>:(
+      <div className="well" style={chatSelectionWell}>
+      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Join Random Room</Button>
+      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Join Nearest User</Button>
+      <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={this.handleInterestSearch}>Join Similar User</Button>
+      </div>)
+      }
+      </div>
     </div>
-    );
-    return buttonsInstance;
+    )
   }
 }
 
