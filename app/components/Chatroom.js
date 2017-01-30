@@ -23,7 +23,8 @@ class Chatroom extends Component {
       showRequest: false,
       rejected: false,
       pcData: {},
-      newMessage: ''
+      newMessage: '',
+      roommates: []
     }
     this.handleMessageSubmit = this.handleMessageSubmit.bind(this);
     this.componentDidMount = this.componentDidMount.bind(this);
@@ -34,7 +35,9 @@ class Chatroom extends Component {
     this.joinPrivate = this.joinPrivate.bind(this);
     this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
     this.handleNewMessage = this.handleNewMessage.bind(this);
-  }
+    this.getRoommates = this.getRoommates.bind(this);
+    this.componentWillUnmount = this.componentWillUnmount.bind(this);
+    }
 
   componentDidMount() {
     //creating a socket connection
@@ -42,6 +45,10 @@ class Chatroom extends Component {
 
     //join a room upon connection
     this.socket.emit('join room', this.props.roomId);
+
+    this.socket.on('update user list', () => {
+      this.getRoommates();
+    })
 
     //listener for any incoming messages and re-setting the state
     this.socket.on('message', message => {
@@ -71,13 +78,36 @@ class Chatroom extends Component {
         rejected: true
       })
     })
+
+    //get roommates when initially joining chatroom
+    this.getRoommates()
   };
+
+  componentWillUnmount() {
+    this.socket.emit('leaveRoom', this.props.roomId);
+  }
 
   //join new room when the new props (roomId) have been passed down
   componentWillReceiveProps(nextProps) {
     if(nextProps.roomId !== this.props.roomId) {
       this.socket.emit('join room', nextProps.roomId);
     }
+  }
+
+  //get updated roommate list when new user joins
+  getRoommates() {
+    axios.get('/getActiveUsers', { params : {
+      roomId: this.props.roomId,
+      userId: this.props.userId
+    }})
+    .then(res => {
+      this.setState({
+        roommates: res.data
+      })
+    })
+    .catch(err => {
+      console.log('error in getting roommates: ', err);
+    })
   }
 
   //handle new message input
@@ -189,6 +219,8 @@ class Chatroom extends Component {
     } else {
       roomTitle = "Private Chat";
     }
+
+    console.log('state in rendering :', this.state.roommates);
 
       return (
       <div>
