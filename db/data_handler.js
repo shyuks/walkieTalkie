@@ -299,7 +299,7 @@ module.exports.findCommonUser = (user, cb) => {
 }
 
 module.exports.getActiveUsers = (inputRoomId, cb) => {
-  db.query('select u.firstname, u.id from Users u join ActiveUsers au on u.id = au.userId where au.roomId = ?',
+  db.query('select u.firstname, u.id from Users u join ActiveUsers au on u.id = au.userId where au.roomId = ? order by u.firstname ASC',
   {replacements : [inputRoomId], type : sequelize.QueryTypes.SELECT})
   .then(userList => {
     cb(false, userList);

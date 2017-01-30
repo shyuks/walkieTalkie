@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ChatLine from './ChatLineItem';
+import UserList from './UserList';
 import ChatJoinModal from './ChatJoinModal.js'
 import io from 'socket.io-client';
 import axios from 'axios';
@@ -8,6 +9,7 @@ import { Button } from 'react-bootstrap';
 import { Alert } from 'react-bootstrap';
 import { FormGroup } from 'react-bootstrap';
 import { Col } from 'react-bootstrap';
+import { Grid } from 'react-bootstrap';
 
 class Chatroom extends Component {
   constructor(props){
@@ -166,11 +168,12 @@ class Chatroom extends Component {
 
   render(){
     var messages = this.state.messages
-    const wellStylesOne = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
+    const wellStyleOne = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
     const wellStyleTwo = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
 
       return (
       <div>
+
         <Modal show={this.state.showRequest} dialogClassName="custom-modal">
           <Modal.Header>
             <Modal.Title id="contained-modal-title-lg">Private Chat</Modal.Title>
@@ -191,21 +194,33 @@ class Chatroom extends Component {
             <Button onClick={this.acceptRejection}>OK</Button>
           </Modal.Body>
         </Modal>
-
         
-        <div className="well" style={wellStylesOne}>
-        {messages.map((message, index) =>
-          <ul key={index}>
-            <ChatLine 
-              message={message}
-              privateChat={this.handlePrivateChat}/>
-          </ul>
-        )}
-        </div>
-        <div className="well" style={wellStyleTwo}>
-        <input type="text" style={{width : 350}} placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
-        </div>
+        <Grid>
+          <Col>
+            <div className="well" style={wellStyleOne}>
+
+            </div>
+          </Col>
+          
+          <Col>
+
+            <div className="well" style={wellStyleTwo}>
+            {messages.map((message, index) =>
+              <ul key={index}>
+                <ChatLine 
+                  message={message}
+                  privateChat={this.handlePrivateChat}/>
+              </ul>
+            )}
+
+            <input type="text" style={{width : 350}} placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+            </div>
+          </Col>
+        
+        </Grid>
+        
         <div>
+        
         {
           this.props.searchResults ? 
           (
@@ -214,6 +229,7 @@ class Chatroom extends Component {
           <div></div>
         }
         </div>
+
       </div>
     )
     }

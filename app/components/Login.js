@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Grid } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
-import { Row } from 'react-bootstrap';
 import { Col } from 'react-bootstrap';
 import { Form } from 'react-bootstrap';
 import { FormGroup } from 'react-bootstrap';
@@ -57,10 +55,9 @@ class Login extends Component {
   }
 
   render(){
+    const loginWellStyle={maxWidth: 500,margin: '0 auto 10px'};
     return (
-      <Grid>
-        <Row>
-          <Col xs={6} md={6}>
+          <Col className="well" style={loginWellStyle}>
             <Form horizontal onSubmit={this.handleUserLogin}>
               <FormGroup controlId="formHorizontalEmail">
                 <Col componentClass={ControlLabel}>
@@ -84,8 +81,6 @@ class Login extends Component {
                </FormGroup>
                </Form>
             </Col>
-        </Row>
-      </Grid>
     )
   }
 }
