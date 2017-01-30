@@ -17,15 +17,15 @@ class ChatLineItem extends Component {
   }
 
   componentDidMount() {
-    axios.get('/getUserInterest', { params : {id : this.props.message.user}})
-    .then(res => {
-      this.setState({
-        interests: res.data
-      })
-    })
-    .catch(err => {
-      console.log('error in getting users interest: ', err);
-    })
+    // axios.get('/getUserInterest', { params : {id : this.props.message.user}})
+    // .then(res => {
+    //   this.setState({
+    //     interests: res.data
+    //   })
+    // })
+    // .catch(err => {
+    //   console.log('error in getting users interest: ', err);
+    // })
   }
     
   render() {
@@ -37,13 +37,16 @@ class ChatLineItem extends Component {
     //     <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
     //   </Popover>
     // );
+    //     <div id='message'>
+    //   <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
+    //         <b>{this.props.message.from}</b>
+    //   </OverlayTrigger>: {this.props.message.body}
+    // </div>
 
     return (
-    <div id='message'>
-            <h4>{this.props.message.from}</h4>
-            <p>{this.props.message.body}</p>
-    </div>
-
+      <div>
+        <p><strong>{this.props.message.from}: </strong>{this.props.message.body}</p>
+      </div>
     )
   }
 }

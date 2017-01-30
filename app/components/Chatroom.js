@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ChatLine from './ChatLineItem';
-import UserList from './UserList';
+import UserItem from './UserItem';
 import ChatJoinModal from './ChatJoinModal.js'
 import io from 'socket.io-client';
 import axios from 'axios';
@@ -24,7 +24,8 @@ class Chatroom extends Component {
       rejected: false,
       pcData: {},
       newMessage: '',
-      roommates: []
+      roommates: [],
+      userSockets: {}
     }
     this.handleMessageSubmit = this.handleMessageSubmit.bind(this);
     this.componentDidMount = this.componentDidMount.bind(this);
@@ -52,8 +53,14 @@ class Chatroom extends Component {
 
     //listener for any incoming messages and re-setting the state
     this.socket.on('message', message => {
+        var activeSockets = this.state.userSockets;
+        if (!activeSockets.hasOwnProperty(message.user)) {
+          activeSockets[message.user] = message.socketId;
+        }
+      
       this.setState({
-        messages: [...this.state.messages, message].slice(0, 50)
+        messages: [...this.state.messages, message].slice(0, 50),
+        userSockets : activeSockets
       });
     });
 
@@ -91,13 +98,15 @@ class Chatroom extends Component {
   componentWillReceiveProps(nextProps) {
     if(nextProps.roomId !== this.props.roomId) {
       this.socket.emit('join room', nextProps.roomId);
+      this.getRoommates(nextProps.roomId);
     }
   }
 
   //get updated roommate list when new user joins
-  getRoommates() {
+  getRoommates(newRoom) {
+    var currentRoom = newRoom || this.props.roomId
     axios.get('/getActiveUsers', { params : {
-      roomId: this.props.roomId,
+      roomId: currentRoom,
       userId: this.props.userId
     }})
     .then(res => {
@@ -220,8 +229,6 @@ class Chatroom extends Component {
       roomTitle = "Private Chat";
     }
 
-    console.log('state in rendering :', this.state.roommates);
-
       return (
       <div>
         <Modal show={this.state.showRequest} dialogClassName="custom-modal">
@@ -255,11 +262,12 @@ class Chatroom extends Component {
                     <div>
                       {
                         this.state.roommates.map(user => {
-                          return <UserList 
-                                  key={users.id} 
+                          var tempSocketId = this.state.userSockets[user.id]
+                          return <UserItem 
+                                  key={user.id} 
                                   user={user} 
                                   privateChat={this.handlePrivateChat}
-                                  message={message}/>
+                                  socketId={tempSocketId}/>
                         })
                       }
                     </div>

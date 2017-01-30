@@ -4,15 +4,26 @@ import InterestsItem from './UserClickInterestsView'
 import { Popover } from 'react-bootstrap';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap';
 
-class UserList extends Component {
+class UserItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      interests: []
+      interests: [],
+      userSocket: this.props.socketId
     }
   //bind all functions here
   this.componentDidMount = this.componentDidMount.bind(this);
+  this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps){
+    if (this.props.socketId !== nextProps.socketId) {
+      this.setState({
+        userSocket : nextProps.socketId
+      })
+    }
   }
 
   componentDidMount() {
@@ -28,15 +39,25 @@ class UserList extends Component {
   }
     
   render() {
+    var alertInstance = (
+      <Alert className="loginSignupAlert" bsStyle="warning">
+        Damn bro... let this user say something before you start clicking...Shieettttt
+      </Alert>
+    );
     var addPopover = (
       <Popover id="popover-trigger-click-root-close" title="User Interests">
         {this.state.interests.map((interest, index) => {
           return <ul key={index}><InterestsItem int={interest.Interest}/></ul>
         })}
-        <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
+        <div>
+          {
+            this.state.userSocket ? (<Button onClick={(e) => {this.props.privateChat(this.state.userSocket, this.props.user.firstname)}}>Invite to Private Chat</Button>)
+            : alertInstance
+          }
+        </div>
+        
       </Popover>
     );
-    console.log('rendering the userlist', this.props.user);
     return (
     <div>
     <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
@@ -48,4 +69,4 @@ class UserList extends Component {
 }
 
 
-export default UserList
+export default UserItem
