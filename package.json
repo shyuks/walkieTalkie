@@ -4,6 +4,9 @@
   "description": "Establishing connections by interests in your location",
   "author": "Greg Hasenauer, Rakan Nesheiwat, Sean Hong",
   "license": "UNLICENSED",
+  "engines": {
+    "node": "5.9.1"
+  },
   "scripts": {
     "start": "node server.js",
     "webpack": "./node_modules/.bin/webpack -d --watch",
