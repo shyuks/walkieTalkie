@@ -92,19 +92,21 @@ class Chatroom extends Component {
   handleMessageSubmit(event) {
     event.preventDefault();
     var body = this.state.newMessage;
-    var message = {
-      body,
-      from: this.props.name,
-      room: this.props.roomId,
-      user: this.props.userId,
-      socketId: this.socket.json.id
-    };
-    this.setState({
-      messages: [...this.state.messages, message].slice(0, 50),
-      newMessage: ''
-    });
-    //sending message to the server
-    this.socket.emit('message', message);
+    if (body) {
+      var message = {
+        body,
+        from: this.props.name,
+        room: this.props.roomId,
+        user: this.props.userId,
+        socketId: this.socket.json.id
+      };
+      this.setState({
+        messages: [...this.state.messages, message].slice(0, 50),
+        newMessage: ''
+      });
+      //sending message to the server
+      this.socket.emit('message', message);
+    }
   }
 
   //handle a private chat request click (initiated by user)
@@ -213,39 +215,41 @@ class Chatroom extends Component {
         
         <Grid>
           <Row>
-          <Col xs={12} md={12}>
-          <Panel header={roomTitle}>
-            <Row>
-            <Col xs={2} md={2}>
-              <div>
-              <p>UserList</p>
-              </div>
-            </Col>
-            
-            <Col xs={10} md={10}>
-              <div>
-              {messages.map((message, index) =>
-                <Row key={index}>
-                  <ul id='message'>
-                    <ChatLine
-                      message={message}
-                      privateChat={this.handlePrivateChat}/>
-                  </ul>
-                </Row>
-              )}
-              </div>
-            </Col>
+            <Col xs={12} md={12}>
+            <Panel header={roomTitle}>
+              <div id="fixedPanel">
+                <Row>
+                  <Col xs={2} md={2}>
+                    <div>
+                    <p>UserList</p>
+                    </div>
+                  </Col>
+                  
+                  <Col xsOffset={1} mdOffset={1} xs={9} md={9}>
+                    <div id="chatbox">
+                    {messages.map((message, index) =>
+                      <Row key={index}>
+                        <Col xs={12} md={12}>
+                          <ChatLine
+                            message={message}
+                            privateChat={this.handlePrivateChat}/>
+                        </Col>
+                      </Row>
+                    )}
+                    </div>
+                  </Col>
 
-            <Col xsOffset={2} mdOffset={2} xs={10} md={10}>
-              <Form onSubmit={this.handleMessageSubmit}>
-                <FormGroup>
-                  <FormControl type="text" placeholder="Enter a Message" value={this.state.newMessage} onChange={this.handleNewMessage} />
-                </FormGroup>
-              </Form>
+                  <Col xsOffset={3} mdOffset={3} xs={9} md={9}>
+                    <Form onSubmit={this.handleMessageSubmit}>
+                      <FormGroup>
+                        <FormControl type="text" placeholder="Enter a Message" value={this.state.newMessage} onChange={this.handleNewMessage}/>
+                      </FormGroup>
+                    </Form>
+                  </Col>
+                </Row>
+              </div>
+            </Panel>
             </Col>
-            </Row>
-          </Panel>
-          </Col>
           </Row>
         </Grid>
         

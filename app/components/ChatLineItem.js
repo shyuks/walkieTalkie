@@ -39,11 +39,11 @@ class ChatLineItem extends Component {
     );
 
     return (
-    <Col xs={12} md={12}>
+    <div id='message'>
       <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
             <b>{this.props.message.from}</b>
       </OverlayTrigger>: {this.props.message.body}
-    </Col>
+    </div>
 
     )
   }
