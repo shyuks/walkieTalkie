@@ -7,11 +7,13 @@ import axios from 'axios';
 import { Modal } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Alert } from 'react-bootstrap';
-import { FormGroup } from 'react-bootstrap';
 import { Row } from 'react-bootstrap';
 import { Col } from 'react-bootstrap';
 import { Grid } from 'react-bootstrap';
 import { Panel } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
+import { FormGroup } from 'react-bootstrap';
+import { FormControl } from 'react-bootstrap';
 
 class Chatroom extends Component {
   constructor(props){
@@ -20,7 +22,8 @@ class Chatroom extends Component {
       messages: [],
       showRequest: false,
       rejected: false,
-      pcData: {}
+      pcData: {},
+      newMessage: ''
     }
     this.handleMessageSubmit = this.handleMessageSubmit.bind(this);
     this.componentDidMount = this.componentDidMount.bind(this);
@@ -30,6 +33,7 @@ class Chatroom extends Component {
     this.acceptRejection = this.acceptRejection.bind(this);
     this.joinPrivate = this.joinPrivate.bind(this);
     this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+    this.handleNewMessage = this.handleNewMessage.bind(this);
   }
 
   componentDidMount() {
@@ -76,24 +80,31 @@ class Chatroom extends Component {
     }
   }
 
+  //handle new message input
+
+  handleNewMessage(event) {
+    this.setState({
+      newMessage: event.target.value
+    })
+  };
+
   //handle all message submissions
   handleMessageSubmit(event) {
-    var body = event.target.value;
-    if(event.keyCode === 13 && body) {
-      var message = {
-        body,
-        from: this.props.name,
-        room: this.props.roomId,
-        user: this.props.userId,
-        socketId: this.socket.json.id
-      };
-      this.setState({
-        messages: [...this.state.messages, message].slice(0, 50)
-      });
-      //sending message to the server
-      this.socket.emit('message', message);
-      event.target.value = '';
-    }
+    event.preventDefault();
+    var body = this.state.newMessage;
+    var message = {
+      body,
+      from: this.props.name,
+      room: this.props.roomId,
+      user: this.props.userId,
+      socketId: this.socket.json.id
+    };
+    this.setState({
+      messages: [...this.state.messages, message].slice(0, 50),
+      newMessage: ''
+    });
+    //sending message to the server
+    this.socket.emit('message', message);
   }
 
   //handle a private chat request click (initiated by user)
@@ -179,7 +190,6 @@ class Chatroom extends Component {
 
       return (
       <div>
-
         <Modal show={this.state.showRequest} dialogClassName="custom-modal">
           <Modal.Header>
             <Modal.Title id="contained-modal-title-lg">Private Chat</Modal.Title>
@@ -202,36 +212,41 @@ class Chatroom extends Component {
         </Modal>
         
         <Grid>
-
+          <Row>
+          <Col xs={12} md={12}>
           <Panel header={roomTitle}>
-
             <Row>
-              <Col xs={2} md={2}>
-                <div>
-                <p>UserList</p>
-                </div>
-              </Col>
-              
-              <Col xs={10} md={10}>
-                <div>
-                {messages.map((message, index) =>
-                  <ul key={index}>
-                    <ChatLine 
+            <Col xs={2} md={2}>
+              <div>
+              <p>UserList</p>
+              </div>
+            </Col>
+            
+            <Col xs={10} md={10}>
+              <div>
+              {messages.map((message, index) =>
+                <Row key={index}>
+                  <ul id='message'>
+                    <ChatLine
                       message={message}
                       privateChat={this.handlePrivateChat}/>
                   </ul>
-                )}
-                </div>
-              </Col>
-            </Row>
+                </Row>
+              )}
+              </div>
+            </Col>
 
-            <Row>
-              <Col xsOffset={2} mdOffset={2} xs={10} md={10}>
-                <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
-              </Col>
+            <Col xsOffset={2} mdOffset={2} xs={10} md={10}>
+              <Form onSubmit={this.handleMessageSubmit}>
+                <FormGroup>
+                  <FormControl type="text" placeholder="Enter a Message" value={this.state.newMessage} onChange={this.handleNewMessage} />
+                </FormGroup>
+              </Form>
+            </Col>
             </Row>
-
           </Panel>
+          </Col>
+          </Row>
         </Grid>
         
         <div>

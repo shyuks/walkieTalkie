@@ -4,6 +4,7 @@ import InterestsItem from './UserClickInterestsView'
 import { Popover } from 'react-bootstrap';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 
 class ChatLineItem extends Component {
   constructor(props) {
@@ -38,11 +39,12 @@ class ChatLineItem extends Component {
     );
 
     return (
-    <div>
-    <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
-          <b>{this.props.message.from}</b>
-    </OverlayTrigger>: {this.props.message.body}
-    </div>
+    <Col xs={12} md={12}>
+      <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
+            <b>{this.props.message.from}</b>
+      </OverlayTrigger>: {this.props.message.body}
+    </Col>
+
     )
   }
 }
