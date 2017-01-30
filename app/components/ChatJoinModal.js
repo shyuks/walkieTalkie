@@ -15,8 +15,7 @@ class ChatJoinModal extends Component {
   }
 
   componentWillMount(){
-    "use strict";
-    let searchOption, host, message;
+    var searchOption, host, message;
 
     if (this.props.searchResults) {
     searchOption = this.props.searchResults.option;

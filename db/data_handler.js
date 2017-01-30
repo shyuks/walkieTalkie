@@ -1,12 +1,10 @@
-"use strict";
-
-let db = require('./config.js')
-let Users = require('./schema/User.js')
-let ActiveUsers = require('./schema/ActiveUsers.js');
-let UserInterests = require('./schema/UserInterests.js');
-let sequelize = require('sequelize')
-let util = require('./util.js')
-let Promise = require('bluebird')
+var db = require('./config.js')
+var Users = require('./schema/User.js')
+var ActiveUsers = require('./schema/ActiveUsers.js');
+var UserInterests = require('./schema/UserInterests.js');
+var sequelize = require('sequelize')
+var util = require('./util.js')
+var Promise = require('bluebird')
 
 module.exports.createUser = (nI, cb) => {
   db.query('select id from Users where email = ?',
@@ -168,21 +166,18 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
           cb(error);
         })
      } else {
-       "use strict";
-       let roomsIds = [];
+       var roomsIds = [];
 
        res1.forEach(id => {roomsIds.push(id['roomId'])});
        db.query('select latitude, longitude, roomId from ActiveUsers where roomId in (?)',
         {replacements : [roomsIds], type : sequelize.QueryTypes.SELECT})
         .then(res4 => {
 
-          "use strict";
-          let currDistance = 10000;
-          let shortestPoint;
+          var currDistance = 10000;
+          var shortestPoint;
 
           for(var i = 0; i <res4.length; i++){
-            "use strict";
-            let temp = util.distance(lat, long, res4[i]['latitude'], res4[i]['longitude']);
+            var temp = util.distance(lat, long, res4[i]['latitude'], res4[i]['longitude']);
             if(temp < currDistance) {
               currDistance = temp;
               shortestPoint = res4[i]['roomId'];
@@ -259,10 +254,9 @@ module.exports.findCommonUser = (user, cb) => {
         db.query('select interestId from UserInterests where userId = ?',
         {replacements : [user], type : sequelize.QueryTypes.SELECT})
         .then(foundInterests => {
-          "use strict";
-          
-          let roomsIds = [];
-          let interestIds = [];
+
+          var roomsIds = [];
+          var interestIds = [];
           res1.forEach(id => {roomsIds.push(id['roomId'])});
           foundInterests.forEach(interest => {interestIds.push(interest['interestId'])});
 

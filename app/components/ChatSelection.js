@@ -21,22 +21,21 @@ class ChatSelection extends Component {
   }
 
 handleUserLocation(e, selection){
-  "use strict";
   e.preventDefault();
 
   this.setState({
     loading : true
   })
 
-  let options = {
+  var options = {
     enableHighAccuracy : true,
     timeout : 5000,
     maximumAge : 0
   };
 
-  let success = (pos) => {
+  var success = (pos) => {
     
-    let crd = pos.coords;
+    var crd = pos.coords;
 
     console.log('Your current position is:');
     console.log(`Latitude : ${crd.latitude}`);
@@ -50,7 +49,7 @@ handleUserLocation(e, selection){
     }
   }
 
-  let error = (err) => {
+  var error = (err) => {
     console.warn(`ERROR(${err.code}): ${err.message}`);
   }
 
