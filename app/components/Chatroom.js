@@ -8,8 +8,10 @@ import { Modal } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import { Alert } from 'react-bootstrap';
 import { FormGroup } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 import { Col } from 'react-bootstrap';
 import { Grid } from 'react-bootstrap';
+import { Panel } from 'react-bootstrap';
 
 class Chatroom extends Component {
   constructor(props){
@@ -168,8 +170,12 @@ class Chatroom extends Component {
 
   render(){
     var messages = this.state.messages
-    const wellStyleOne = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
-    const wellStyleTwo = {maxWidth: 400, height: 'auto', margin: '0 auto 10px'};
+    var roomTitle = '';
+    if (typeof this.props.roomId === 'number') {
+      roomTitle = "Room " + this.props.roomId;
+    } else {
+      roomTitle = "Private Chat";
+    }
 
       return (
       <div>
@@ -196,27 +202,36 @@ class Chatroom extends Component {
         </Modal>
         
         <Grid>
-          <Col>
-            <div className="well" style={wellStyleOne}>
 
-            </div>
-          </Col>
-          
-          <Col>
+          <Panel header={roomTitle}>
 
-            <div className="well" style={wellStyleTwo}>
-            {messages.map((message, index) =>
-              <ul key={index}>
-                <ChatLine 
-                  message={message}
-                  privateChat={this.handlePrivateChat}/>
-              </ul>
-            )}
+            <Row>
+              <Col xs={2} md={2}>
+                <div>
+                <p>UserList</p>
+                </div>
+              </Col>
+              
+              <Col xs={10} md={10}>
+                <div>
+                {messages.map((message, index) =>
+                  <ul key={index}>
+                    <ChatLine 
+                      message={message}
+                      privateChat={this.handlePrivateChat}/>
+                  </ul>
+                )}
+                </div>
+              </Col>
+            </Row>
 
-            <input type="text" style={{width : 350}} placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
-            </div>
-          </Col>
-        
+            <Row>
+              <Col xsOffset={2} mdOffset={2} xs={10} md={10}>
+                <input type="text" placeholder="Enter a Message" onKeyUp={this.handleMessageSubmit} />
+              </Col>
+            </Row>
+
+          </Panel>
         </Grid>
         
         <div>
