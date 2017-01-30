@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import Loading from 'react-loading';
 import { Modal } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 
 class ChatSelection extends Component {
   constructor(props){
@@ -122,22 +123,25 @@ handleClose(){
 }
 
   render() {
-    const wellStylesOne = {maxWidth: 500, height: 300, margin: '0 auto 10px'};
-    const wellStyles = {maxWidth : 500, margin: '0 auto 10px'};
-
-    return this.state.loading ? 
-    <Loading className="load" type="cylon" color="#001f3f" height={600} width={1200} delay={0}/> 
-    : (
+    const loadingCol = {maxWidth: 500, margin: '0 auto 10px'};
+    const chatSelectionWell = {maxWidth : 500, margin: '0 auto 10px'};
+    return (
     <div>
       <Modal show={this.state.show} onHide={this.handleClose} dialogClassName="custom-modal">
       <Modal.Header closeButton>
       <Modal.Title id="contained-modal-title-lg">{this.state.message}</Modal.Title>
       </Modal.Header>
       </Modal>
-      <div className="well" style={wellStyles}>
+      <div>
+      { this.state.loading ?
+      <Col style={loadingCol}>
+      <Loading type="bars" color="#001f3f" width={500} heigth={500} delay={0}/> </Col>:(
+      <div className="well" style={chatSelectionWell}>
       <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'global')}>Join Random Room</Button>
       <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={(e)=>this.handleUserLocation(e, 'local')}>Join Nearest User</Button>
       <Button className = "selectionButton" bsStyle="primary" bsSize="large" block onClick={this.handleInterestSearch}>Join Similar User</Button>
+      </div>)
+      }
       </div>
     </div>
     )
