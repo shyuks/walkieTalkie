@@ -40,7 +40,7 @@ app.get('/checkSession', (req, res) => {
 });
 
 app.get('/getActiveUsers', (req, res) => {
-  dataHandler.getActiveUsers(req.query.roomId, , req.query.userId, (error, result) => {
+  dataHandler.getActiveUsers(req.query.roomId, req.query.userId, (error, result) => {
     if (error) {
       res.status(500).send(error);
     } else {
