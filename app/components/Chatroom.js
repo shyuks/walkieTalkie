@@ -49,6 +49,8 @@ class Chatroom extends Component {
     //join a room upon connection
     this.socket.emit('join room', this.props.roomId);
 
+    this.socket.emit('announce join', {room: this.props.roomId, user: this.props.name})
+
     this.socket.on('update user list', () => {
       this.getRoommates();
     })
@@ -93,7 +95,10 @@ class Chatroom extends Component {
   };
 
   componentWillUnmount() {
-    this.socket.emit('leaveRoom', this.props.roomId);
+    this.socket.emit('leaveRoom', {
+      room: this.props.roomId,
+      user: this.props.name
+    });
   }
 
   //join new room when the new props (roomId) have been passed down
@@ -104,6 +109,7 @@ class Chatroom extends Component {
     }
   }
 
+  //scrolls to bottom when new message is received or sent
   scrollToBottom() {
     var scrollHeight = this.chatList.scrollHeight;
     var height = this.chatList.clientHeight;
@@ -111,7 +117,7 @@ class Chatroom extends Component {
     this.chatList.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     this.scrollToBottom();
   }
 
@@ -175,7 +181,10 @@ class Chatroom extends Component {
   //accept a received private chat request
   acceptPrivateChat() {
     //leave current room before joining new room
-    this.socket.emit('leaveRoom', this.props.roomId);
+    this.socket.emit('leaveRoom', {
+      room: this.props.roomId,
+      user: this.props.name
+    });;
     var priv = this.state.pcData;
     //logging out user from active users to join private room
     axios.post('/privateRoom', {id : priv.privateRoom})
@@ -208,7 +217,10 @@ class Chatroom extends Component {
   //sender joins the private chat after receiver accepted and created a room
   joinPrivate() {
     //leave current room before joining new private room
-    this.socket.emit('leaveRoom', this.props.roomId);
+    this.socket.emit('leaveRoom', {
+      room: this.props.roomId,
+      user: this.props.name
+    });
     var priv = this.state.pcData
     //request to logout as active user to join a private chat
     axios.post('/privateRoom', {id : priv.privateRoom})

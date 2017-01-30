@@ -206,6 +206,15 @@ io.on('connection', socket => {
     socket.join(room);
   })
 
+  socket.on('announce join', announcement => {
+    socket.to(announcement.room).emit('message', {
+      body: announcement.user + ' has joined the room.',
+      from: 'Admin',
+      user: 'Admin',
+      socketID: 0
+    });
+  });
+
   //listening for incoming messages
   socket.on('message', message => {
     console.log('you are sending the message to room: ', message.room);
@@ -231,11 +240,17 @@ io.on('connection', socket => {
   })
 
   //listening for a request to leave current room
-  socket.on('leaveRoom', room => {
-    console.log("leaving room ", room);
-    socket.broadcast.to(room).emit('update user list');
+  socket.on('leaveRoom', leaverData => {
+    console.log("leaving room ", leaverData.room);
+    socket.broadcast.to(leaverData.room).emit('message', {
+      body: leaverData.user + ' has left the room.',
+      from: 'Admin',
+      user: 'Admin',
+      socketID: 0
+    })
+    socket.broadcast.to(leaverData.room).emit('update user list');
     //leaving current room
-    socket.leave(room);
+    socket.leave(leaverData.room);
   })
 
   //listening for a declined private chat request
