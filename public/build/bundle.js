@@ -21528,7 +21528,7 @@
 
 	var _Chatroom2 = _interopRequireDefault(_Chatroom);
 
-	var _ChatSelection = __webpack_require__(518);
+	var _ChatSelection = __webpack_require__(463);
 
 	var _ChatSelection2 = _interopRequireDefault(_ChatSelection);
 
@@ -42772,19 +42772,19 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _ChatLineItem = __webpack_require__(463);
+	var _ChatLineItem = __webpack_require__(465);
 
 	var _ChatLineItem2 = _interopRequireDefault(_ChatLineItem);
 
-	var _UserItem = __webpack_require__(520);
+	var _UserItem = __webpack_require__(466);
 
 	var _UserItem2 = _interopRequireDefault(_UserItem);
 
-	var _ChatJoinModal = __webpack_require__(466);
+	var _ChatJoinModal = __webpack_require__(468);
 
 	var _ChatJoinModal2 = _interopRequireDefault(_ChatJoinModal);
 
-	var _socket = __webpack_require__(467);
+	var _socket = __webpack_require__(469);
 
 	var _socket2 = _interopRequireDefault(_socket);
 
@@ -42832,6 +42832,8 @@
 	    _this.handleNewMessage = _this.handleNewMessage.bind(_this);
 	    _this.getRoommates = _this.getRoommates.bind(_this);
 	    _this.componentWillUnmount = _this.componentWillUnmount.bind(_this);
+	    _this.scrollToBottom = _this.scrollToBottom.bind(_this);
+	    _this.componentDidUpdate = _this.componentDidUpdate.bind(_this);
 	    return _this;
 	  }
 
@@ -42845,6 +42847,8 @@
 
 	      //join a room upon connection
 	      this.socket.emit('join room', this.props.roomId);
+
+	      this.socket.emit('announce join', { room: this.props.roomId, user: this.props.name });
 
 	      this.socket.on('update user list', function () {
 	        _this2.getRoommates();
@@ -42891,7 +42895,10 @@
 	  }, {
 	    key: 'componentWillUnmount',
 	    value: function componentWillUnmount() {
-	      this.socket.emit('leaveRoom', this.props.roomId);
+	      this.socket.emit('leaveRoom', {
+	        room: this.props.roomId,
+	        user: this.props.name
+	      });
 	    }
 
 	    //join new room when the new props (roomId) have been passed down
@@ -42903,6 +42910,22 @@
 	        this.socket.emit('join room', nextProps.roomId);
 	        this.getRoommates(nextProps.roomId);
 	      }
+	    }
+
+	    //scrolls to bottom when new message is received or sent
+
+	  }, {
+	    key: 'scrollToBottom',
+	    value: function scrollToBottom() {
+	      var scrollHeight = this.chatList.scrollHeight;
+	      var height = this.chatList.clientHeight;
+	      var maxScrollTop = scrollHeight - height;
+	      this.chatList.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+	    }
+	  }, {
+	    key: 'componentDidUpdate',
+	    value: function componentDidUpdate(prevProps, prevState) {
+	      this.scrollToBottom();
 	    }
 
 	    //get updated roommate list when new user joins
@@ -42981,7 +43004,10 @@
 	      var _this4 = this;
 
 	      //leave current room before joining new room
-	      this.socket.emit('leaveRoom', this.props.roomId);
+	      this.socket.emit('leaveRoom', {
+	        room: this.props.roomId,
+	        user: this.props.name
+	      });;
 	      var priv = this.state.pcData;
 	      //logging out user from active users to join private room
 	      _axios2.default.post('/privateRoom', { id: priv.privateRoom }).then(function (res) {
@@ -43019,7 +43045,10 @@
 	      var _this5 = this;
 
 	      //leave current room before joining new private room
-	      this.socket.emit('leaveRoom', this.props.roomId);
+	      this.socket.emit('leaveRoom', {
+	        room: this.props.roomId,
+	        user: this.props.name
+	      });
 	      var priv = this.state.pcData;
 	      //request to logout as active user to join a private chat
 	      _axios2.default.post('/privateRoom', { id: priv.privateRoom }).then(function (res) {
@@ -43160,7 +43189,9 @@
 	                      { xsOffset: 1, mdOffset: 1, xs: 9, md: 9 },
 	                      _react2.default.createElement(
 	                        'div',
-	                        { id: 'chatbox' },
+	                        { id: 'chatbox', ref: function ref(div) {
+	                            _this6.chatList = div;
+	                          } },
 	                        messages.map(function (message, index) {
 	                          return _react2.default.createElement(
 	                            _reactBootstrap.Row,
@@ -43229,7 +43260,540 @@
 
 	var _axios2 = _interopRequireDefault(_axios);
 
-	var _UserClickInterestsView = __webpack_require__(464);
+	var _reactBootstrap = __webpack_require__(206);
+
+	var _reactLoading = __webpack_require__(464);
+
+	var _reactLoading2 = _interopRequireDefault(_reactLoading);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ChatSelection = function (_Component) {
+	  _inherits(ChatSelection, _Component);
+
+	  function ChatSelection(props) {
+	    _classCallCheck(this, ChatSelection);
+
+	    var _this = _possibleConstructorReturn(this, (ChatSelection.__proto__ || Object.getPrototypeOf(ChatSelection)).call(this, props));
+
+	    _this.state = {
+	      loading: false,
+	      show: false,
+	      message: ''
+	    };
+	    _this.handleGlobalSearch = _this.handleGlobalSearch.bind(_this);
+	    _this.handleLocalSearch = _this.handleLocalSearch.bind(_this);
+	    _this.handleUserLocation = _this.handleUserLocation.bind(_this);
+	    _this.handleInterestSearch = _this.handleInterestSearch.bind(_this);
+	    _this.handleClose = _this.handleClose.bind(_this);
+	    return _this;
+	  }
+
+	  _createClass(ChatSelection, [{
+	    key: 'handleUserLocation',
+	    value: function handleUserLocation(e, selection) {
+	      var _this2 = this;
+
+	      e.preventDefault();
+
+	      this.setState({
+	        loading: true
+	      });
+
+	      var options = {
+	        enableHighAccuracy: true,
+	        timeout: 5000,
+	        maximumAge: 0
+	      };
+
+	      var success = function success(pos) {
+
+	        var crd = pos.coords;
+
+	        console.log('Your current position is:');
+	        console.log('Latitude : ' + crd.latitude);
+	        console.log('Longitude: ' + crd.longitude);
+	        console.log('More or less ' + crd.accuracy + ' meters.');
+
+	        if (selection === 'local') {
+	          _this2.handleLocalSearch(crd.latitude, crd.longitude);
+	        } else {
+	          _this2.handleGlobalSearch(crd.latitude, crd.longitude);
+	        }
+	      };
+
+	      var error = function error(err) {
+	        console.warn('ERROR(' + err.code + '): ' + err.message);
+	      };
+
+	      navigator.geolocation.getCurrentPosition(success, error, options);
+	    }
+	  }, {
+	    key: 'handleGlobalSearch',
+	    value: function handleGlobalSearch(lat, long) {
+	      var _this3 = this;
+
+	      _axios2.default.get('/findGlobalRoom', {
+	        params: {
+	          latitude: lat,
+	          longitude: long
+	        }
+	      }).then(function (res) {
+	        _this3.props.selectRoom(res.data.roomId, 1, { 'host': res.data.host });
+	      }).catch(function (error) {
+	        console.log(error);
+	      });
+	    }
+	  }, {
+	    key: 'handleLocalSearch',
+	    value: function handleLocalSearch(lat, long) {
+	      var _this4 = this;
+
+	      _axios2.default.get('/findLocalRoom', {
+	        params: {
+	          latitude: lat,
+	          longitude: long
+	        }
+	      }).then(function (res) {
+	        _this4.props.selectRoom(res.data.roomId, 2, { 'host': res.data.host, 'distance': res.data.distance });
+	      }).catch(function (error) {
+	        console.log(error);
+	      });
+	    }
+	  }, {
+	    key: 'handleInterestSearch',
+	    value: function handleInterestSearch() {
+	      var _this5 = this;
+
+	      this.setState({
+	        show: false,
+	        loading: true
+	      });
+	      _axios2.default.get('/findCommonUser').then(function (result) {
+	        if (!result.data) {
+	          _this5.setState({
+	            loading: false,
+	            show: true,
+	            message: 'Users with common interests are not available, try local chat'
+	          });
+	        } else if (result.data.hasNoInterests) {
+	          _this5.setState({
+	            loading: false,
+	            show: true,
+	            message: 'You do not have any interests saved!'
+	          });
+	        } else {
+	          _this5.props.selectRoom(result.data.roomId, 3, { 'interest': result.data.interests });
+	        }
+	      }).catch(function (error) {
+	        console.log(error);
+	      });
+	    }
+	  }, {
+	    key: 'handleClose',
+	    value: function handleClose() {
+	      this.setState({
+	        show: false,
+	        message: ''
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this6 = this;
+
+	      var loadingCol = { maxWidth: 500, margin: '0 auto 10px' };
+	      var chatSelectionWell = { maxWidth: 500, margin: '0 auto 10px' };
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          _reactBootstrap.Modal,
+	          { show: this.state.show, onHide: this.handleClose, dialogClassName: 'custom-modal' },
+	          _react2.default.createElement(
+	            _reactBootstrap.Modal.Header,
+	            { closeButton: true },
+	            _react2.default.createElement(
+	              _reactBootstrap.Modal.Title,
+	              { id: 'contained-modal-title-lg' },
+	              this.state.message
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          null,
+	          this.state.loading ? _react2.default.createElement(
+	            _reactBootstrap.Col,
+	            { style: loadingCol },
+	            _react2.default.createElement(_reactLoading2.default, { type: 'bars', color: '#001f3f', width: 500, heigth: 500, delay: 0 }),
+	            ' '
+	          ) : _react2.default.createElement(
+	            'div',
+	            { className: 'well', style: chatSelectionWell },
+	            _react2.default.createElement(
+	              _reactBootstrap.Button,
+	              { className: 'selectionButton', bsStyle: 'primary', bsSize: 'large', block: true, onClick: function onClick(e) {
+	                  return _this6.handleUserLocation(e, 'global');
+	                } },
+	              'Join Random Room'
+	            ),
+	            _react2.default.createElement(
+	              _reactBootstrap.Button,
+	              { className: 'selectionButton', bsStyle: 'primary', bsSize: 'large', block: true, onClick: function onClick(e) {
+	                  return _this6.handleUserLocation(e, 'local');
+	                } },
+	              'Join Nearest User'
+	            ),
+	            _react2.default.createElement(
+	              _reactBootstrap.Button,
+	              { className: 'selectionButton', bsStyle: 'primary', bsSize: 'large', block: true, onClick: this.handleInterestSearch },
+	              'Join Similar User'
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return ChatSelection;
+	}(_react.Component);
+
+	exports.default = ChatSelection;
+
+/***/ },
+/* 464 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function webpackUniversalModuleDefinition(root, factory) {
+		if(true)
+			module.exports = factory(__webpack_require__(1));
+		else if(typeof define === 'function' && define.amd)
+			define(["react"], factory);
+		else if(typeof exports === 'object')
+			exports["Loading"] = factory(require("react"));
+		else
+			root["Loading"] = factory(root["React"]);
+	})(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
+	return /******/ (function(modules) { // webpackBootstrap
+	/******/ 	// The module cache
+	/******/ 	var installedModules = {};
+
+	/******/ 	// The require function
+	/******/ 	function __webpack_require__(moduleId) {
+
+	/******/ 		// Check if module is in cache
+	/******/ 		if(installedModules[moduleId])
+	/******/ 			return installedModules[moduleId].exports;
+
+	/******/ 		// Create a new module (and put it into the cache)
+	/******/ 		var module = installedModules[moduleId] = {
+	/******/ 			exports: {},
+	/******/ 			id: moduleId,
+	/******/ 			loaded: false
+	/******/ 		};
+
+	/******/ 		// Execute the module function
+	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+	/******/ 		// Flag the module as loaded
+	/******/ 		module.loaded = true;
+
+	/******/ 		// Return the exports of the module
+	/******/ 		return module.exports;
+	/******/ 	}
+
+
+	/******/ 	// expose the modules object (__webpack_modules__)
+	/******/ 	__webpack_require__.m = modules;
+
+	/******/ 	// expose the module cache
+	/******/ 	__webpack_require__.c = installedModules;
+
+	/******/ 	// __webpack_public_path__
+	/******/ 	__webpack_require__.p = "";
+
+	/******/ 	// Load entry module and return exports
+	/******/ 	return __webpack_require__(0);
+	/******/ })
+	/************************************************************************/
+	/******/ ([
+	/* 0 */
+	/***/ function(module, exports, __webpack_require__) {
+
+		'use strict';
+
+		Object.defineProperty(exports, '__esModule', {
+		  value: true
+		});
+
+		var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+		var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+		function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+		function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+		function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+		function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+		var _react = __webpack_require__(1);
+
+		var _react2 = _interopRequireDefault(_react);
+
+		var _svg = __webpack_require__(2);
+
+		var svgSources = _interopRequireWildcard(_svg);
+
+		var Loading = (function (_Component) {
+		  _inherits(Loading, _Component);
+
+		  function Loading() {
+		    _classCallCheck(this, Loading);
+
+		    _get(Object.getPrototypeOf(Loading.prototype), 'constructor', this).call(this);
+		    this.state = {
+		      delayed: false
+		    };
+		  }
+
+		  _createClass(Loading, [{
+		    key: 'componentWillMount',
+		    value: function componentWillMount() {
+		      var _this = this;
+
+		      var delayed = this.props.delay > 0;
+
+		      if (delayed) {
+		        this.setState({ delayed: true });
+		        this._timeout = setTimeout(function () {
+		          _this.setState({ delayed: false });
+		        }, this.props.delay);
+		      }
+		    }
+		  }, {
+		    key: 'componentWillUnmount',
+		    value: function componentWillUnmount() {
+		      this._timeout && clearTimeout(this._timeout);
+		    }
+		  }, {
+		    key: 'render',
+		    value: function render() {
+		      var type = this.state.delayed ? 'blank' : this.props.type;
+		      var svg = svgSources[type];
+		      var style = {
+		        fill: this.props.color,
+		        height: this.props.height,
+		        width: this.props.width
+		      };
+
+		      return _react2['default'].createElement('div', {
+		        style: style,
+		        dangerouslySetInnerHTML: { __html: svg }
+		      });
+		    }
+		  }]);
+
+		  return Loading;
+		})(_react.Component);
+
+		exports['default'] = Loading;
+
+		Loading.propTypes = {
+		  color: _react.PropTypes.string,
+		  delay: _react.PropTypes.number,
+		  height: _react.PropTypes.oneOfType([_react.PropTypes.number, _react.PropTypes.string]),
+		  type: _react.PropTypes.string,
+		  width: _react.PropTypes.oneOfType([_react.PropTypes.number, _react.PropTypes.string])
+		};
+		Loading.defaultProps = {
+		  color: '#fff',
+		  delay: 1000,
+		  height: 64,
+		  type: 'balls',
+		  width: 64
+		};
+		module.exports = exports['default'];
+
+	/***/ },
+	/* 1 */
+	/***/ function(module, exports) {
+
+		module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+
+	/***/ },
+	/* 2 */
+	/***/ function(module, exports, __webpack_require__) {
+
+		'use strict';
+
+		Object.defineProperty(exports, '__esModule', {
+		  value: true
+		});
+
+		function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
+
+		var _blankSvg = __webpack_require__(3);
+
+		exports.blank = _interopRequire(_blankSvg);
+
+		var _loadingBallsSvg = __webpack_require__(4);
+
+		exports.balls = _interopRequire(_loadingBallsSvg);
+
+		var _loadingBarsSvg = __webpack_require__(5);
+
+		exports.bars = _interopRequire(_loadingBarsSvg);
+
+		var _loadingBubblesSvg = __webpack_require__(6);
+
+		exports.bubbles = _interopRequire(_loadingBubblesSvg);
+
+		var _loadingCubesSvg = __webpack_require__(7);
+
+		exports.cubes = _interopRequire(_loadingCubesSvg);
+
+		var _loadingCylonSvg = __webpack_require__(8);
+
+		exports.cylon = _interopRequire(_loadingCylonSvg);
+
+		var _loadingSpinSvg = __webpack_require__(9);
+
+		exports.spin = _interopRequire(_loadingSpinSvg);
+
+		var _loadingSpinningBubblesSvg = __webpack_require__(10);
+
+		exports.spinningBubbles = _interopRequire(_loadingSpinningBubblesSvg);
+
+		var _loadingSpokesSvg = __webpack_require__(11);
+
+		exports.spokes = _interopRequire(_loadingSpokesSvg);
+
+	/***/ },
+	/* 3 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg class=\"icon-blank\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"></svg>\n"
+
+	/***/ },
+	/* 4 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg class=\"icon-loading\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(-8 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"-8 0; 2 0; 2 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.25;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(2 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"2 0; 12 0; 12 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.35;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(12 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"12 0; 22 0; 22 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.45;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(24 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"22 0; 32 0; 32 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.55;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n</svg>\n"
+
+	/***/ },
+	/* 5 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(2)\" d=\"M0 12 V20 H4 V12z\"> \n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(8)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.2\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(14)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.4\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path transform=\"translate(20)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.6\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path transform=\"translate(26)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.8\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n</svg>\n"
+
+	/***/ },
+	/* 6 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <circle transform=\"translate(8 0)\" cx=\"0\" cy=\"16\" r=\"0\"> \n    <animate attributeName=\"r\" values=\"0; 4; 0; 0\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0\"\n      keytimes=\"0;0.2;0.7;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"translate(16 0)\" cx=\"0\" cy=\"16\" r=\"0\"> \n    <animate attributeName=\"r\" values=\"0; 4; 0; 0\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.3\"\n      keytimes=\"0;0.2;0.7;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"translate(24 0)\" cx=\"0\" cy=\"16\" r=\"0\"> \n    <animate attributeName=\"r\" values=\"0; 4; 0; 0\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.6\"\n      keytimes=\"0;0.2;0.7;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n</svg>\n"
+
+	/***/ },
+	/* 7 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(-8 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"-8 0; 2 0; 2 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.25;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(2 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"2 0; 12 0; 12 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.35;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(12 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"12 0; 22 0; 22 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.45;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(24 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"22 0; 32 0; 32 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.55;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n</svg>\n"
+
+	/***/ },
+	/* 8 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(0 0)\" d=\"M0 12 V20 H4 V12z\">\n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"0 0; 28 0; 0 0; 0 0\" dur=\"1.5s\" begin=\"0\" repeatCount=\"indefinite\" keytimes=\"0;0.3;0.6;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path opacity=\"0.5\" transform=\"translate(0 0)\" d=\"M0 12 V20 H4 V12z\">\n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"0 0; 28 0; 0 0; 0 0\" dur=\"1.5s\" begin=\"0.1s\" repeatCount=\"indefinite\" keytimes=\"0;0.3;0.6;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path opacity=\"0.25\" transform=\"translate(0 0)\" d=\"M0 12 V20 H4 V12z\">\n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"0 0; 28 0; 0 0; 0 0\" dur=\"1.5s\" begin=\"0.2s\" repeatCount=\"indefinite\" keytimes=\"0;0.3;0.6;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n</svg>\n"
+
+	/***/ },
+	/* 9 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path opacity=\".25\" d=\"M16 0 A16 16 0 0 0 16 32 A16 16 0 0 0 16 0 M16 4 A12 12 0 0 1 16 28 A12 12 0 0 1 16 4\"/>\n  <path d=\"M16 0 A16 16 0 0 1 32 16 L28 16 A12 12 0 0 0 16 4z\">\n    <animateTransform attributeName=\"transform\" type=\"rotate\" from=\"0 16 16\" to=\"360 16 16\" dur=\"0.8s\" repeatCount=\"indefinite\" />\n  </path>\n</svg>\n"
+
+	/***/ },
+	/* 10 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <circle cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(45 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.125s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(90 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.25s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(135 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.375s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(180 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.5s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(225 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.625s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(270 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.75s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(315 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.875s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(180 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.5s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n</svg>\n"
+
+	/***/ },
+	/* 11 */
+	/***/ function(module, exports) {
+
+		module.exports = "<svg id=\"loading\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(0 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(45 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.125s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(90 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.25s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(135 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.375s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(180 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.5s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(225 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.675s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(270 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.75s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(315 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.875s\"/>\n  </path>\n</svg>\n"
+
+	/***/ }
+	/******/ ])
+	});
+	;
+
+/***/ },
+/* 465 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var ChatLineItem = function ChatLineItem(_ref) {
+	  var message = _ref.message;
+	  return _react2.default.createElement(
+	    'div',
+	    null,
+	    _react2.default.createElement(
+	      'p',
+	      null,
+	      _react2.default.createElement(
+	        'strong',
+	        null,
+	        message.from,
+	        ': '
+	      ),
+	      message.body
+	    )
+	  );
+	};
+
+	exports.default = ChatLineItem;
+
+/***/ },
+/* 466 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _axios = __webpack_require__(179);
+
+	var _axios2 = _interopRequireDefault(_axios);
+
+	var _UserClickInterestsView = __webpack_require__(467);
 
 	var _UserClickInterestsView2 = _interopRequireDefault(_UserClickInterestsView);
 
@@ -43243,77 +43807,101 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ChatLineItem = function (_Component) {
-	  _inherits(ChatLineItem, _Component);
+	var UserItem = function (_Component) {
+	  _inherits(UserItem, _Component);
 
-	  function ChatLineItem(props) {
-	    _classCallCheck(this, ChatLineItem);
+	  function UserItem(props) {
+	    _classCallCheck(this, UserItem);
 
-	    var _this = _possibleConstructorReturn(this, (ChatLineItem.__proto__ || Object.getPrototypeOf(ChatLineItem)).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (UserItem.__proto__ || Object.getPrototypeOf(UserItem)).call(this, props));
 
 	    _this.state = {
-	      interests: []
+	      interests: [],
+	      userSocket: _this.props.socketId
 	    };
 	    //bind all functions here
 	    _this.componentDidMount = _this.componentDidMount.bind(_this);
+	    _this.componentWillReceiveProps = _this.componentWillReceiveProps.bind(_this);
 	    return _this;
 	  }
 
-	  _createClass(ChatLineItem, [{
+	  _createClass(UserItem, [{
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps(nextProps) {
+	      if (this.props.socketId !== nextProps.socketId) {
+	        this.setState({
+	          userSocket: nextProps.socketId
+	        });
+	      }
+	    }
+	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      // axios.get('/getUserInterest', { params : {id : this.props.message.user}})
-	      // .then(res => {
-	      //   this.setState({
-	      //     interests: res.data
-	      //   })
-	      // })
-	      // .catch(err => {
-	      //   console.log('error in getting users interest: ', err);
-	      // })
+	      var _this2 = this;
+
+	      _axios2.default.get('/getUserInterest', { params: { id: this.props.user.id } }).then(function (res) {
+	        _this2.setState({
+	          interests: res.data
+	        });
+	      }).catch(function (err) {
+	        console.log('error in getting users interest: ', err);
+	      });
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      // var addPopover = (
-	      //   <Popover id="popover-trigger-click-root-close" title="User Interests">
-	      //     {this.state.interests.map((interest, index) => {
-	      //       return <ul key={index}><InterestsItem int={interest.Interest}/></ul>
-	      //     })}
-	      //     <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
-	      //   </Popover>
-	      // );
-	      //     <div id='message'>
-	      //   <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
-	      //         <b>{this.props.message.from}</b>
-	      //   </OverlayTrigger>: {this.props.message.body}
-	      // </div>
+	      var _this3 = this;
 
+	      var alertInstance = _react2.default.createElement(
+	        _reactBootstrap.Alert,
+	        { className: 'loginSignupAlert', bsStyle: 'warning' },
+	        'Damn bro... let this user say something before you start clicking...Shieettttt'
+	      );
+	      var addPopover = _react2.default.createElement(
+	        _reactBootstrap.Popover,
+	        { id: 'popover-trigger-click-root-close', title: 'User Interests' },
+	        this.state.interests.map(function (interest, index) {
+	          return _react2.default.createElement(
+	            'ul',
+	            { key: index },
+	            _react2.default.createElement(_UserClickInterestsView2.default, { int: interest.Interest })
+	          );
+	        }),
+	        _react2.default.createElement(
+	          'div',
+	          null,
+	          this.state.userSocket ? _react2.default.createElement(
+	            _reactBootstrap.Button,
+	            { onClick: function onClick(e) {
+	                _this3.props.privateChat(_this3.state.userSocket, _this3.props.user.firstname);
+	              } },
+	            'Invite to Private Chat'
+	          ) : alertInstance
+	        )
+	      );
 	      return _react2.default.createElement(
 	        'div',
 	        null,
 	        _react2.default.createElement(
-	          'p',
-	          null,
+	          _reactBootstrap.OverlayTrigger,
+	          { trigger: 'click', rootClose: true, placement: 'bottom', overlay: addPopover },
 	          _react2.default.createElement(
-	            'strong',
+	            'b',
 	            null,
-	            this.props.message.from,
-	            ': '
-	          ),
-	          this.props.message.body
+	            this.props.user.firstname
+	          )
 	        )
 	      );
 	    }
 	  }]);
 
-	  return ChatLineItem;
+	  return UserItem;
 	}(_react.Component);
 
-	exports.default = ChatLineItem;
+	exports.default = UserItem;
 
 /***/ },
-/* 464 */
+/* 467 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -43344,8 +43932,7 @@
 	exports.default = UserInterestsItemized;
 
 /***/ },
-/* 465 */,
-/* 466 */
+/* 468 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -43360,7 +43947,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _UserClickInterestsView = __webpack_require__(464);
+	var _UserClickInterestsView = __webpack_require__(467);
 
 	var _UserClickInterestsView2 = _interopRequireDefault(_UserClickInterestsView);
 
@@ -43462,7 +44049,7 @@
 	exports.default = ChatJoinModal;
 
 /***/ },
-/* 467 */
+/* 469 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -43470,10 +44057,10 @@
 	 * Module dependencies.
 	 */
 
-	var url = __webpack_require__(468);
-	var parser = __webpack_require__(473);
-	var Manager = __webpack_require__(484);
-	var debug = __webpack_require__(470)('socket.io-client');
+	var url = __webpack_require__(470);
+	var parser = __webpack_require__(475);
+	var Manager = __webpack_require__(486);
+	var debug = __webpack_require__(472)('socket.io-client');
 
 	/**
 	 * Module exports.
@@ -43572,12 +44159,12 @@
 	 * @api public
 	 */
 
-	exports.Manager = __webpack_require__(484);
-	exports.Socket = __webpack_require__(513);
+	exports.Manager = __webpack_require__(486);
+	exports.Socket = __webpack_require__(515);
 
 
 /***/ },
-/* 468 */
+/* 470 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -43585,8 +44172,8 @@
 	 * Module dependencies.
 	 */
 
-	var parseuri = __webpack_require__(469);
-	var debug = __webpack_require__(470)('socket.io-client:url');
+	var parseuri = __webpack_require__(471);
+	var debug = __webpack_require__(472)('socket.io-client:url');
 
 	/**
 	 * Module exports.
@@ -43659,7 +44246,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 469 */
+/* 471 */
 /***/ function(module, exports) {
 
 	/**
@@ -43704,7 +44291,7 @@
 
 
 /***/ },
-/* 470 */
+/* 472 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {
@@ -43714,7 +44301,7 @@
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(471);
+	exports = module.exports = __webpack_require__(473);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -43888,7 +44475,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 471 */
+/* 473 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -43904,7 +44491,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(472);
+	exports.humanize = __webpack_require__(474);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -44094,7 +44681,7 @@
 
 
 /***/ },
-/* 472 */
+/* 474 */
 /***/ function(module, exports) {
 
 	/**
@@ -44249,7 +44836,7 @@
 
 
 /***/ },
-/* 473 */
+/* 475 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -44257,11 +44844,11 @@
 	 * Module dependencies.
 	 */
 
-	var debug = __webpack_require__(474)('socket.io-parser');
-	var json = __webpack_require__(477);
-	var Emitter = __webpack_require__(480);
-	var binary = __webpack_require__(481);
-	var isBuf = __webpack_require__(483);
+	var debug = __webpack_require__(476)('socket.io-parser');
+	var json = __webpack_require__(479);
+	var Emitter = __webpack_require__(482);
+	var binary = __webpack_require__(483);
+	var isBuf = __webpack_require__(485);
 
 	/**
 	 * Protocol version.
@@ -44659,7 +45246,7 @@
 
 
 /***/ },
-/* 474 */
+/* 476 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -44669,7 +45256,7 @@
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(475);
+	exports = module.exports = __webpack_require__(477);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -44833,7 +45420,7 @@
 
 
 /***/ },
-/* 475 */
+/* 477 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -44849,7 +45436,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(476);
+	exports.humanize = __webpack_require__(478);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -45036,7 +45623,7 @@
 
 
 /***/ },
-/* 476 */
+/* 478 */
 /***/ function(module, exports) {
 
 	/**
@@ -45167,14 +45754,14 @@
 
 
 /***/ },
-/* 477 */
+/* 479 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 	;(function () {
 	  // Detect the `define` function exposed by asynchronous module loaders. The
 	  // strict `define` check is necessary for compatibility with `r.js`.
-	  var isLoader = "function" === "function" && __webpack_require__(479);
+	  var isLoader = "function" === "function" && __webpack_require__(481);
 
 	  // A set of types used to distinguish objects from primitives.
 	  var objectTypes = {
@@ -46073,10 +46660,10 @@
 	  }
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(478)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(480)(module), (function() { return this; }())))
 
 /***/ },
-/* 478 */
+/* 480 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -46092,7 +46679,7 @@
 
 
 /***/ },
-/* 479 */
+/* 481 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -46100,7 +46687,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 480 */
+/* 482 */
 /***/ function(module, exports) {
 
 	
@@ -46270,7 +46857,7 @@
 
 
 /***/ },
-/* 481 */
+/* 483 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -46279,8 +46866,8 @@
 	 * Module requirements
 	 */
 
-	var isArray = __webpack_require__(482);
-	var isBuf = __webpack_require__(483);
+	var isArray = __webpack_require__(484);
+	var isBuf = __webpack_require__(485);
 
 	/**
 	 * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -46418,7 +47005,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 482 */
+/* 484 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -46427,7 +47014,7 @@
 
 
 /***/ },
-/* 483 */
+/* 485 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -46447,7 +47034,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 484 */
+/* 486 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -46455,15 +47042,15 @@
 	 * Module dependencies.
 	 */
 
-	var eio = __webpack_require__(485);
-	var Socket = __webpack_require__(513);
-	var Emitter = __webpack_require__(502);
-	var parser = __webpack_require__(473);
-	var on = __webpack_require__(515);
-	var bind = __webpack_require__(516);
-	var debug = __webpack_require__(470)('socket.io-client:manager');
-	var indexOf = __webpack_require__(511);
-	var Backoff = __webpack_require__(517);
+	var eio = __webpack_require__(487);
+	var Socket = __webpack_require__(515);
+	var Emitter = __webpack_require__(504);
+	var parser = __webpack_require__(475);
+	var on = __webpack_require__(517);
+	var bind = __webpack_require__(518);
+	var debug = __webpack_require__(472)('socket.io-client:manager');
+	var indexOf = __webpack_require__(513);
+	var Backoff = __webpack_require__(519);
 
 	/**
 	 * IE6+ hasOwnProperty
@@ -47013,19 +47600,19 @@
 
 
 /***/ },
-/* 485 */
+/* 487 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(486);
+	module.exports = __webpack_require__(488);
 
 
 /***/ },
-/* 486 */
+/* 488 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(487);
+	module.exports = __webpack_require__(489);
 
 	/**
 	 * Exports parser
@@ -47033,25 +47620,25 @@
 	 * @api public
 	 *
 	 */
-	module.exports.parser = __webpack_require__(494);
+	module.exports.parser = __webpack_require__(496);
 
 
 /***/ },
-/* 487 */
+/* 489 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var transports = __webpack_require__(488);
-	var Emitter = __webpack_require__(502);
-	var debug = __webpack_require__(506)('engine.io-client:socket');
-	var index = __webpack_require__(511);
-	var parser = __webpack_require__(494);
-	var parseuri = __webpack_require__(469);
-	var parsejson = __webpack_require__(512);
-	var parseqs = __webpack_require__(503);
+	var transports = __webpack_require__(490);
+	var Emitter = __webpack_require__(504);
+	var debug = __webpack_require__(508)('engine.io-client:socket');
+	var index = __webpack_require__(513);
+	var parser = __webpack_require__(496);
+	var parseuri = __webpack_require__(471);
+	var parsejson = __webpack_require__(514);
+	var parseqs = __webpack_require__(505);
 
 	/**
 	 * Module exports.
@@ -47183,9 +47770,9 @@
 	 */
 
 	Socket.Socket = Socket;
-	Socket.Transport = __webpack_require__(493);
-	Socket.transports = __webpack_require__(488);
-	Socket.parser = __webpack_require__(494);
+	Socket.Transport = __webpack_require__(495);
+	Socket.transports = __webpack_require__(490);
+	Socket.parser = __webpack_require__(496);
 
 	/**
 	 * Creates transport of the given type.
@@ -47782,17 +48369,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 488 */
+/* 490 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies
 	 */
 
-	var XMLHttpRequest = __webpack_require__(489);
-	var XHR = __webpack_require__(491);
-	var JSONP = __webpack_require__(508);
-	var websocket = __webpack_require__(509);
+	var XMLHttpRequest = __webpack_require__(491);
+	var XHR = __webpack_require__(493);
+	var JSONP = __webpack_require__(510);
+	var websocket = __webpack_require__(511);
 
 	/**
 	 * Export transports.
@@ -47842,12 +48429,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 489 */
+/* 491 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {// browser shim for xmlhttprequest module
 
-	var hasCORS = __webpack_require__(490);
+	var hasCORS = __webpack_require__(492);
 
 	module.exports = function (opts) {
 	  var xdomain = opts.xdomain;
@@ -47886,7 +48473,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 490 */
+/* 492 */
 /***/ function(module, exports) {
 
 	
@@ -47909,18 +48496,18 @@
 
 
 /***/ },
-/* 491 */
+/* 493 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module requirements.
 	 */
 
-	var XMLHttpRequest = __webpack_require__(489);
-	var Polling = __webpack_require__(492);
-	var Emitter = __webpack_require__(502);
-	var inherit = __webpack_require__(504);
-	var debug = __webpack_require__(506)('engine.io-client:polling-xhr');
+	var XMLHttpRequest = __webpack_require__(491);
+	var Polling = __webpack_require__(494);
+	var Emitter = __webpack_require__(504);
+	var inherit = __webpack_require__(506);
+	var debug = __webpack_require__(508)('engine.io-client:polling-xhr');
 
 	/**
 	 * Module exports.
@@ -48340,19 +48927,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 492 */
+/* 494 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(493);
-	var parseqs = __webpack_require__(503);
-	var parser = __webpack_require__(494);
-	var inherit = __webpack_require__(504);
-	var yeast = __webpack_require__(505);
-	var debug = __webpack_require__(506)('engine.io-client:polling');
+	var Transport = __webpack_require__(495);
+	var parseqs = __webpack_require__(505);
+	var parser = __webpack_require__(496);
+	var inherit = __webpack_require__(506);
+	var yeast = __webpack_require__(507);
+	var debug = __webpack_require__(508)('engine.io-client:polling');
 
 	/**
 	 * Module exports.
@@ -48365,7 +48952,7 @@
 	 */
 
 	var hasXHR2 = (function () {
-	  var XMLHttpRequest = __webpack_require__(489);
+	  var XMLHttpRequest = __webpack_require__(491);
 	  var xhr = new XMLHttpRequest({ xdomain: false });
 	  return null != xhr.responseType;
 	})();
@@ -48591,15 +49178,15 @@
 
 
 /***/ },
-/* 493 */
+/* 495 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(494);
-	var Emitter = __webpack_require__(502);
+	var parser = __webpack_require__(496);
+	var Emitter = __webpack_require__(504);
 
 	/**
 	 * Module exports.
@@ -48754,22 +49341,22 @@
 
 
 /***/ },
-/* 494 */
+/* 496 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var keys = __webpack_require__(495);
-	var hasBinary = __webpack_require__(496);
-	var sliceBuffer = __webpack_require__(497);
-	var after = __webpack_require__(498);
-	var utf8 = __webpack_require__(499);
+	var keys = __webpack_require__(497);
+	var hasBinary = __webpack_require__(498);
+	var sliceBuffer = __webpack_require__(499);
+	var after = __webpack_require__(500);
+	var utf8 = __webpack_require__(501);
 
 	var base64encoder;
 	if (global && global.ArrayBuffer) {
-	  base64encoder = __webpack_require__(500);
+	  base64encoder = __webpack_require__(502);
 	}
 
 	/**
@@ -48827,7 +49414,7 @@
 	 * Create a blob api even for blob builder when vendor prefixes exist
 	 */
 
-	var Blob = __webpack_require__(501);
+	var Blob = __webpack_require__(503);
 
 	/**
 	 * Encodes a packet.
@@ -49370,7 +49957,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 495 */
+/* 497 */
 /***/ function(module, exports) {
 
 	
@@ -49395,7 +49982,7 @@
 
 
 /***/ },
-/* 496 */
+/* 498 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -49403,7 +49990,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(482);
+	var isArray = __webpack_require__(484);
 
 	/**
 	 * Module exports.
@@ -49461,7 +50048,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 497 */
+/* 499 */
 /***/ function(module, exports) {
 
 	/**
@@ -49496,7 +50083,7 @@
 
 
 /***/ },
-/* 498 */
+/* 500 */
 /***/ function(module, exports) {
 
 	module.exports = after
@@ -49530,7 +50117,7 @@
 
 
 /***/ },
-/* 499 */
+/* 501 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/wtf8 v1.0.0 by @mathias */
@@ -49766,10 +50353,10 @@
 
 	}(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(478)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(480)(module), (function() { return this; }())))
 
 /***/ },
-/* 500 */
+/* 502 */
 /***/ function(module, exports) {
 
 	/*
@@ -49842,7 +50429,7 @@
 
 
 /***/ },
-/* 501 */
+/* 503 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -49945,7 +50532,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 502 */
+/* 504 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -50114,7 +50701,7 @@
 
 
 /***/ },
-/* 503 */
+/* 505 */
 /***/ function(module, exports) {
 
 	/**
@@ -50157,7 +50744,7 @@
 
 
 /***/ },
-/* 504 */
+/* 506 */
 /***/ function(module, exports) {
 
 	
@@ -50169,7 +50756,7 @@
 	};
 
 /***/ },
-/* 505 */
+/* 507 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -50243,7 +50830,7 @@
 
 
 /***/ },
-/* 506 */
+/* 508 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {
@@ -50253,7 +50840,7 @@
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(507);
+	exports = module.exports = __webpack_require__(509);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -50427,7 +51014,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 507 */
+/* 509 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -50443,7 +51030,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(472);
+	exports.humanize = __webpack_require__(474);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -50633,7 +51220,7 @@
 
 
 /***/ },
-/* 508 */
+/* 510 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -50641,8 +51228,8 @@
 	 * Module requirements.
 	 */
 
-	var Polling = __webpack_require__(492);
-	var inherit = __webpack_require__(504);
+	var Polling = __webpack_require__(494);
+	var inherit = __webpack_require__(506);
 
 	/**
 	 * Module exports.
@@ -50871,24 +51458,24 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 509 */
+/* 511 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(493);
-	var parser = __webpack_require__(494);
-	var parseqs = __webpack_require__(503);
-	var inherit = __webpack_require__(504);
-	var yeast = __webpack_require__(505);
-	var debug = __webpack_require__(506)('engine.io-client:websocket');
+	var Transport = __webpack_require__(495);
+	var parser = __webpack_require__(496);
+	var parseqs = __webpack_require__(505);
+	var inherit = __webpack_require__(506);
+	var yeast = __webpack_require__(507);
+	var debug = __webpack_require__(508)('engine.io-client:websocket');
 	var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 	var NodeWebSocket;
 	if (typeof window === 'undefined') {
 	  try {
-	    NodeWebSocket = __webpack_require__(510);
+	    NodeWebSocket = __webpack_require__(512);
 	  } catch (e) { }
 	}
 
@@ -51163,13 +51750,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 510 */
+/* 512 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 511 */
+/* 513 */
 /***/ function(module, exports) {
 
 	
@@ -51184,7 +51771,7 @@
 	};
 
 /***/ },
-/* 512 */
+/* 514 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -51222,7 +51809,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 513 */
+/* 515 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -51230,13 +51817,13 @@
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(473);
-	var Emitter = __webpack_require__(502);
-	var toArray = __webpack_require__(514);
-	var on = __webpack_require__(515);
-	var bind = __webpack_require__(516);
-	var debug = __webpack_require__(470)('socket.io-client:socket');
-	var hasBin = __webpack_require__(496);
+	var parser = __webpack_require__(475);
+	var Emitter = __webpack_require__(504);
+	var toArray = __webpack_require__(516);
+	var on = __webpack_require__(517);
+	var bind = __webpack_require__(518);
+	var debug = __webpack_require__(472)('socket.io-client:socket');
+	var hasBin = __webpack_require__(498);
 
 	/**
 	 * Module exports.
@@ -51647,7 +52234,7 @@
 
 
 /***/ },
-/* 514 */
+/* 516 */
 /***/ function(module, exports) {
 
 	module.exports = toArray
@@ -51666,7 +52253,7 @@
 
 
 /***/ },
-/* 515 */
+/* 517 */
 /***/ function(module, exports) {
 
 	
@@ -51696,7 +52283,7 @@
 
 
 /***/ },
-/* 516 */
+/* 518 */
 /***/ function(module, exports) {
 
 	/**
@@ -51725,7 +52312,7 @@
 
 
 /***/ },
-/* 517 */
+/* 519 */
 /***/ function(module, exports) {
 
 	
@@ -51814,629 +52401,6 @@
 	};
 
 
-
-/***/ },
-/* 518 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _axios = __webpack_require__(179);
-
-	var _axios2 = _interopRequireDefault(_axios);
-
-	var _reactBootstrap = __webpack_require__(206);
-
-	var _reactLoading = __webpack_require__(519);
-
-	var _reactLoading2 = _interopRequireDefault(_reactLoading);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var ChatSelection = function (_Component) {
-	  _inherits(ChatSelection, _Component);
-
-	  function ChatSelection(props) {
-	    _classCallCheck(this, ChatSelection);
-
-	    var _this = _possibleConstructorReturn(this, (ChatSelection.__proto__ || Object.getPrototypeOf(ChatSelection)).call(this, props));
-
-	    _this.state = {
-	      loading: false,
-	      show: false,
-	      message: ''
-	    };
-	    _this.handleGlobalSearch = _this.handleGlobalSearch.bind(_this);
-	    _this.handleLocalSearch = _this.handleLocalSearch.bind(_this);
-	    _this.handleUserLocation = _this.handleUserLocation.bind(_this);
-	    _this.handleInterestSearch = _this.handleInterestSearch.bind(_this);
-	    _this.handleClose = _this.handleClose.bind(_this);
-	    return _this;
-	  }
-
-	  _createClass(ChatSelection, [{
-	    key: 'handleUserLocation',
-	    value: function handleUserLocation(e, selection) {
-	      var _this2 = this;
-
-	      e.preventDefault();
-
-	      this.setState({
-	        loading: true
-	      });
-
-	      var options = {
-	        enableHighAccuracy: true,
-	        timeout: 5000,
-	        maximumAge: 0
-	      };
-
-	      var success = function success(pos) {
-
-	        var crd = pos.coords;
-
-	        console.log('Your current position is:');
-	        console.log('Latitude : ' + crd.latitude);
-	        console.log('Longitude: ' + crd.longitude);
-	        console.log('More or less ' + crd.accuracy + ' meters.');
-
-	        if (selection === 'local') {
-	          _this2.handleLocalSearch(crd.latitude, crd.longitude);
-	        } else {
-	          _this2.handleGlobalSearch(crd.latitude, crd.longitude);
-	        }
-	      };
-
-	      var error = function error(err) {
-	        console.warn('ERROR(' + err.code + '): ' + err.message);
-	      };
-
-	      navigator.geolocation.getCurrentPosition(success, error, options);
-	    }
-	  }, {
-	    key: 'handleGlobalSearch',
-	    value: function handleGlobalSearch(lat, long) {
-	      var _this3 = this;
-
-	      _axios2.default.get('/findGlobalRoom', {
-	        params: {
-	          latitude: lat,
-	          longitude: long
-	        }
-	      }).then(function (res) {
-	        _this3.props.selectRoom(res.data.roomId, 1, { 'host': res.data.host });
-	      }).catch(function (error) {
-	        console.log(error);
-	      });
-	    }
-	  }, {
-	    key: 'handleLocalSearch',
-	    value: function handleLocalSearch(lat, long) {
-	      var _this4 = this;
-
-	      _axios2.default.get('/findLocalRoom', {
-	        params: {
-	          latitude: lat,
-	          longitude: long
-	        }
-	      }).then(function (res) {
-	        _this4.props.selectRoom(res.data.roomId, 2, { 'host': res.data.host, 'distance': res.data.distance });
-	      }).catch(function (error) {
-	        console.log(error);
-	      });
-	    }
-	  }, {
-	    key: 'handleInterestSearch',
-	    value: function handleInterestSearch() {
-	      var _this5 = this;
-
-	      this.setState({
-	        show: false,
-	        loading: true
-	      });
-	      _axios2.default.get('/findCommonUser').then(function (result) {
-	        if (!result.data) {
-	          _this5.setState({
-	            loading: false,
-	            show: true,
-	            message: 'Users with common interests are not available, try local chat'
-	          });
-	        } else if (result.data.hasNoInterests) {
-	          _this5.setState({
-	            loading: false,
-	            show: true,
-	            message: 'You do not have any interests saved!'
-	          });
-	        } else {
-	          _this5.props.selectRoom(result.data.roomId, 3, { 'interest': result.data.interests });
-	        }
-	      }).catch(function (error) {
-	        console.log(error);
-	      });
-	    }
-	  }, {
-	    key: 'handleClose',
-	    value: function handleClose() {
-	      this.setState({
-	        show: false,
-	        message: ''
-	      });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
-	      var _this6 = this;
-
-	      var loadingCol = { maxWidth: 500, margin: '0 auto 10px' };
-	      var chatSelectionWell = { maxWidth: 500, margin: '0 auto 10px' };
-	      return _react2.default.createElement(
-	        'div',
-	        null,
-	        _react2.default.createElement(
-	          _reactBootstrap.Modal,
-	          { show: this.state.show, onHide: this.handleClose, dialogClassName: 'custom-modal' },
-	          _react2.default.createElement(
-	            _reactBootstrap.Modal.Header,
-	            { closeButton: true },
-	            _react2.default.createElement(
-	              _reactBootstrap.Modal.Title,
-	              { id: 'contained-modal-title-lg' },
-	              this.state.message
-	            )
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          null,
-	          this.state.loading ? _react2.default.createElement(
-	            _reactBootstrap.Col,
-	            { style: loadingCol },
-	            _react2.default.createElement(_reactLoading2.default, { type: 'bars', color: '#001f3f', width: 500, heigth: 500, delay: 0 }),
-	            ' '
-	          ) : _react2.default.createElement(
-	            'div',
-	            { className: 'well', style: chatSelectionWell },
-	            _react2.default.createElement(
-	              _reactBootstrap.Button,
-	              { className: 'selectionButton', bsStyle: 'primary', bsSize: 'large', block: true, onClick: function onClick(e) {
-	                  return _this6.handleUserLocation(e, 'global');
-	                } },
-	              'Join Random Room'
-	            ),
-	            _react2.default.createElement(
-	              _reactBootstrap.Button,
-	              { className: 'selectionButton', bsStyle: 'primary', bsSize: 'large', block: true, onClick: function onClick(e) {
-	                  return _this6.handleUserLocation(e, 'local');
-	                } },
-	              'Join Nearest User'
-	            ),
-	            _react2.default.createElement(
-	              _reactBootstrap.Button,
-	              { className: 'selectionButton', bsStyle: 'primary', bsSize: 'large', block: true, onClick: this.handleInterestSearch },
-	              'Join Similar User'
-	            )
-	          )
-	        )
-	      );
-	    }
-	  }]);
-
-	  return ChatSelection;
-	}(_react.Component);
-
-	exports.default = ChatSelection;
-
-/***/ },
-/* 519 */
-/***/ function(module, exports, __webpack_require__) {
-
-	(function webpackUniversalModuleDefinition(root, factory) {
-		if(true)
-			module.exports = factory(__webpack_require__(1));
-		else if(typeof define === 'function' && define.amd)
-			define(["react"], factory);
-		else if(typeof exports === 'object')
-			exports["Loading"] = factory(require("react"));
-		else
-			root["Loading"] = factory(root["React"]);
-	})(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
-	return /******/ (function(modules) { // webpackBootstrap
-	/******/ 	// The module cache
-	/******/ 	var installedModules = {};
-
-	/******/ 	// The require function
-	/******/ 	function __webpack_require__(moduleId) {
-
-	/******/ 		// Check if module is in cache
-	/******/ 		if(installedModules[moduleId])
-	/******/ 			return installedModules[moduleId].exports;
-
-	/******/ 		// Create a new module (and put it into the cache)
-	/******/ 		var module = installedModules[moduleId] = {
-	/******/ 			exports: {},
-	/******/ 			id: moduleId,
-	/******/ 			loaded: false
-	/******/ 		};
-
-	/******/ 		// Execute the module function
-	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
-	/******/ 		// Flag the module as loaded
-	/******/ 		module.loaded = true;
-
-	/******/ 		// Return the exports of the module
-	/******/ 		return module.exports;
-	/******/ 	}
-
-
-	/******/ 	// expose the modules object (__webpack_modules__)
-	/******/ 	__webpack_require__.m = modules;
-
-	/******/ 	// expose the module cache
-	/******/ 	__webpack_require__.c = installedModules;
-
-	/******/ 	// __webpack_public_path__
-	/******/ 	__webpack_require__.p = "";
-
-	/******/ 	// Load entry module and return exports
-	/******/ 	return __webpack_require__(0);
-	/******/ })
-	/************************************************************************/
-	/******/ ([
-	/* 0 */
-	/***/ function(module, exports, __webpack_require__) {
-
-		'use strict';
-
-		Object.defineProperty(exports, '__esModule', {
-		  value: true
-		});
-
-		var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-		var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-		function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
-
-		function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-		function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-		function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-		var _react = __webpack_require__(1);
-
-		var _react2 = _interopRequireDefault(_react);
-
-		var _svg = __webpack_require__(2);
-
-		var svgSources = _interopRequireWildcard(_svg);
-
-		var Loading = (function (_Component) {
-		  _inherits(Loading, _Component);
-
-		  function Loading() {
-		    _classCallCheck(this, Loading);
-
-		    _get(Object.getPrototypeOf(Loading.prototype), 'constructor', this).call(this);
-		    this.state = {
-		      delayed: false
-		    };
-		  }
-
-		  _createClass(Loading, [{
-		    key: 'componentWillMount',
-		    value: function componentWillMount() {
-		      var _this = this;
-
-		      var delayed = this.props.delay > 0;
-
-		      if (delayed) {
-		        this.setState({ delayed: true });
-		        this._timeout = setTimeout(function () {
-		          _this.setState({ delayed: false });
-		        }, this.props.delay);
-		      }
-		    }
-		  }, {
-		    key: 'componentWillUnmount',
-		    value: function componentWillUnmount() {
-		      this._timeout && clearTimeout(this._timeout);
-		    }
-		  }, {
-		    key: 'render',
-		    value: function render() {
-		      var type = this.state.delayed ? 'blank' : this.props.type;
-		      var svg = svgSources[type];
-		      var style = {
-		        fill: this.props.color,
-		        height: this.props.height,
-		        width: this.props.width
-		      };
-
-		      return _react2['default'].createElement('div', {
-		        style: style,
-		        dangerouslySetInnerHTML: { __html: svg }
-		      });
-		    }
-		  }]);
-
-		  return Loading;
-		})(_react.Component);
-
-		exports['default'] = Loading;
-
-		Loading.propTypes = {
-		  color: _react.PropTypes.string,
-		  delay: _react.PropTypes.number,
-		  height: _react.PropTypes.oneOfType([_react.PropTypes.number, _react.PropTypes.string]),
-		  type: _react.PropTypes.string,
-		  width: _react.PropTypes.oneOfType([_react.PropTypes.number, _react.PropTypes.string])
-		};
-		Loading.defaultProps = {
-		  color: '#fff',
-		  delay: 1000,
-		  height: 64,
-		  type: 'balls',
-		  width: 64
-		};
-		module.exports = exports['default'];
-
-	/***/ },
-	/* 1 */
-	/***/ function(module, exports) {
-
-		module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
-
-	/***/ },
-	/* 2 */
-	/***/ function(module, exports, __webpack_require__) {
-
-		'use strict';
-
-		Object.defineProperty(exports, '__esModule', {
-		  value: true
-		});
-
-		function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
-
-		var _blankSvg = __webpack_require__(3);
-
-		exports.blank = _interopRequire(_blankSvg);
-
-		var _loadingBallsSvg = __webpack_require__(4);
-
-		exports.balls = _interopRequire(_loadingBallsSvg);
-
-		var _loadingBarsSvg = __webpack_require__(5);
-
-		exports.bars = _interopRequire(_loadingBarsSvg);
-
-		var _loadingBubblesSvg = __webpack_require__(6);
-
-		exports.bubbles = _interopRequire(_loadingBubblesSvg);
-
-		var _loadingCubesSvg = __webpack_require__(7);
-
-		exports.cubes = _interopRequire(_loadingCubesSvg);
-
-		var _loadingCylonSvg = __webpack_require__(8);
-
-		exports.cylon = _interopRequire(_loadingCylonSvg);
-
-		var _loadingSpinSvg = __webpack_require__(9);
-
-		exports.spin = _interopRequire(_loadingSpinSvg);
-
-		var _loadingSpinningBubblesSvg = __webpack_require__(10);
-
-		exports.spinningBubbles = _interopRequire(_loadingSpinningBubblesSvg);
-
-		var _loadingSpokesSvg = __webpack_require__(11);
-
-		exports.spokes = _interopRequire(_loadingSpokesSvg);
-
-	/***/ },
-	/* 3 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg class=\"icon-blank\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"></svg>\n"
-
-	/***/ },
-	/* 4 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg class=\"icon-loading\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(-8 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"-8 0; 2 0; 2 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.25;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(2 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"2 0; 12 0; 12 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.35;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(12 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"12 0; 22 0; 22 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.45;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(24 0)\" d=\"M4 12 A4 4 0 0 0 4 20 A4 4 0 0 0 4 12\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"22 0; 32 0; 32 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.55;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n</svg>\n"
-
-	/***/ },
-	/* 5 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(2)\" d=\"M0 12 V20 H4 V12z\"> \n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(8)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.2\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(14)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.4\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path transform=\"translate(20)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.6\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path transform=\"translate(26)\" d=\"M0 12 V20 H4 V12z\">\n    <animate attributeName=\"d\" values=\"M0 12 V20 H4 V12z; M0 4 V28 H4 V4z; M0 12 V20 H4 V12z; M0 12 V20 H4 V12z\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.8\" keytimes=\"0;.2;.5;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.8 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n</svg>\n"
-
-	/***/ },
-	/* 6 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <circle transform=\"translate(8 0)\" cx=\"0\" cy=\"16\" r=\"0\"> \n    <animate attributeName=\"r\" values=\"0; 4; 0; 0\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0\"\n      keytimes=\"0;0.2;0.7;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"translate(16 0)\" cx=\"0\" cy=\"16\" r=\"0\"> \n    <animate attributeName=\"r\" values=\"0; 4; 0; 0\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.3\"\n      keytimes=\"0;0.2;0.7;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"translate(24 0)\" cx=\"0\" cy=\"16\" r=\"0\"> \n    <animate attributeName=\"r\" values=\"0; 4; 0; 0\" dur=\"1.2s\" repeatCount=\"indefinite\" begin=\"0.6\"\n      keytimes=\"0;0.2;0.7;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n</svg>\n"
-
-	/***/ },
-	/* 7 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(-8 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"-8 0; 2 0; 2 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.25;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(2 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"2 0; 12 0; 12 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.35;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(12 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"12 0; 22 0; 22 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.45;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n  <path transform=\"translate(24 0)\" d=\"M0 12 V20 H8 V12z\"> \n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"22 0; 32 0; 32 0;\" dur=\"0.8s\" repeatCount=\"indefinite\" begin=\"0\" keytimes=\"0;.55;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.6 0.4 0.8\" calcMode=\"spline\"  />\n  </path>\n</svg>\n"
-
-	/***/ },
-	/* 8 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path transform=\"translate(0 0)\" d=\"M0 12 V20 H4 V12z\">\n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"0 0; 28 0; 0 0; 0 0\" dur=\"1.5s\" begin=\"0\" repeatCount=\"indefinite\" keytimes=\"0;0.3;0.6;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path opacity=\"0.5\" transform=\"translate(0 0)\" d=\"M0 12 V20 H4 V12z\">\n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"0 0; 28 0; 0 0; 0 0\" dur=\"1.5s\" begin=\"0.1s\" repeatCount=\"indefinite\" keytimes=\"0;0.3;0.6;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n  <path opacity=\"0.25\" transform=\"translate(0 0)\" d=\"M0 12 V20 H4 V12z\">\n    <animateTransform attributeName=\"transform\" type=\"translate\" values=\"0 0; 28 0; 0 0; 0 0\" dur=\"1.5s\" begin=\"0.2s\" repeatCount=\"indefinite\" keytimes=\"0;0.3;0.6;1\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </path>\n</svg>\n"
-
-	/***/ },
-	/* 9 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path opacity=\".25\" d=\"M16 0 A16 16 0 0 0 16 32 A16 16 0 0 0 16 0 M16 4 A12 12 0 0 1 16 28 A12 12 0 0 1 16 4\"/>\n  <path d=\"M16 0 A16 16 0 0 1 32 16 L28 16 A12 12 0 0 0 16 4z\">\n    <animateTransform attributeName=\"transform\" type=\"rotate\" from=\"0 16 16\" to=\"360 16 16\" dur=\"0.8s\" repeatCount=\"indefinite\" />\n  </path>\n</svg>\n"
-
-	/***/ },
-	/* 10 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <circle cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(45 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.125s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(90 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.25s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(135 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.375s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(180 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.5s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(225 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.625s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(270 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.75s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(315 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.875s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n  <circle transform=\"rotate(180 16 16)\" cx=\"16\" cy=\"3\" r=\"0\">\n    <animate attributeName=\"r\" values=\"0;3;0;0\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.5s\" keySplines=\"0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8\" calcMode=\"spline\" />\n  </circle>\n</svg>\n"
-
-	/***/ },
-	/* 11 */
-	/***/ function(module, exports) {
-
-		module.exports = "<svg id=\"loading\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(0 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(45 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.125s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(90 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.25s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(135 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.375s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(180 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.5s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(225 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.675s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(270 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.75s\"/>\n  </path>\n  <path opacity=\".1\" d=\"M14 0 H18 V8 H14 z\" transform=\"rotate(315 16 16)\">\n    <animate attributeName=\"opacity\" from=\"1\" to=\".1\" dur=\"1s\" repeatCount=\"indefinite\" begin=\"0.875s\"/>\n  </path>\n</svg>\n"
-
-	/***/ }
-	/******/ ])
-	});
-	;
-
-/***/ },
-/* 520 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _axios = __webpack_require__(179);
-
-	var _axios2 = _interopRequireDefault(_axios);
-
-	var _UserClickInterestsView = __webpack_require__(464);
-
-	var _UserClickInterestsView2 = _interopRequireDefault(_UserClickInterestsView);
-
-	var _reactBootstrap = __webpack_require__(206);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var UserItem = function (_Component) {
-	  _inherits(UserItem, _Component);
-
-	  function UserItem(props) {
-	    _classCallCheck(this, UserItem);
-
-	    var _this = _possibleConstructorReturn(this, (UserItem.__proto__ || Object.getPrototypeOf(UserItem)).call(this, props));
-
-	    _this.state = {
-	      interests: [],
-	      userSocket: _this.props.socketId
-	    };
-	    //bind all functions here
-	    _this.componentDidMount = _this.componentDidMount.bind(_this);
-	    _this.componentWillReceiveProps = _this.componentWillReceiveProps.bind(_this);
-	    return _this;
-	  }
-
-	  _createClass(UserItem, [{
-	    key: 'componentWillReceiveProps',
-	    value: function componentWillReceiveProps(nextProps) {
-	      if (this.props.socketId !== nextProps.socketId) {
-	        this.setState({
-	          userSocket: nextProps.socketId
-	        });
-	      }
-	    }
-	  }, {
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      var _this2 = this;
-
-	      _axios2.default.get('/getUserInterest', { params: { id: this.props.user.id } }).then(function (res) {
-	        _this2.setState({
-	          interests: res.data
-	        });
-	      }).catch(function (err) {
-	        console.log('error in getting users interest: ', err);
-	      });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
-	      var _this3 = this;
-
-	      var alertInstance = _react2.default.createElement(
-	        _reactBootstrap.Alert,
-	        { className: 'loginSignupAlert', bsStyle: 'warning' },
-	        'Damn bro... let this user say something before you start clicking...Shieettttt'
-	      );
-	      var addPopover = _react2.default.createElement(
-	        _reactBootstrap.Popover,
-	        { id: 'popover-trigger-click-root-close', title: 'User Interests' },
-	        this.state.interests.map(function (interest, index) {
-	          return _react2.default.createElement(
-	            'ul',
-	            { key: index },
-	            _react2.default.createElement(_UserClickInterestsView2.default, { int: interest.Interest })
-	          );
-	        }),
-	        _react2.default.createElement(
-	          'div',
-	          null,
-	          this.state.userSocket ? _react2.default.createElement(
-	            _reactBootstrap.Button,
-	            { onClick: function onClick(e) {
-	                _this3.props.privateChat(_this3.state.userSocket, _this3.props.user.firstname);
-	              } },
-	            'Invite to Private Chat'
-	          ) : alertInstance
-	        )
-	      );
-	      return _react2.default.createElement(
-	        'div',
-	        null,
-	        _react2.default.createElement(
-	          _reactBootstrap.OverlayTrigger,
-	          { trigger: 'click', rootClose: true, placement: 'bottom', overlay: addPopover },
-	          _react2.default.createElement(
-	            'b',
-	            null,
-	            this.props.user.firstname
-	          )
-	        )
-	      );
-	    }
-	  }]);
-
-	  return UserItem;
-	}(_react.Component);
-
-	exports.default = UserItem;
 
 /***/ }
 /******/ ]);
