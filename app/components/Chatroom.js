@@ -38,6 +38,8 @@ class Chatroom extends Component {
     this.handleNewMessage = this.handleNewMessage.bind(this);
     this.getRoommates = this.getRoommates.bind(this);
     this.componentWillUnmount = this.componentWillUnmount.bind(this);
+    this.scrollToBottom = this.scrollToBottom.bind(this);
+    this.componentDidUpdate = this.componentDidUpdate.bind(this);
     }
 
   componentDidMount() {
@@ -100,6 +102,17 @@ class Chatroom extends Component {
       this.socket.emit('join room', nextProps.roomId);
       this.getRoommates(nextProps.roomId);
     }
+  }
+
+  scrollToBottom() {
+    var scrollHeight = this.chatList.scrollHeight;
+    var height = this.chatList.clientHeight;
+    var maxScrollTop = scrollHeight - height;
+    this.chatList.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+  }
+
+  componentDidUpdate() {
+    this.scrollToBottom();
   }
 
   //get updated roommate list when new user joins
@@ -274,7 +287,7 @@ class Chatroom extends Component {
                   </Col>
                   
                   <Col xsOffset={1} mdOffset={1} xs={9} md={9}>
-                    <div id="chatbox">
+                    <div id="chatbox" ref={div => {this.chatList = div}}>
                     {messages.map((message, index) =>
                       <Row key={index}>
                         <Col xs={12} md={12}>

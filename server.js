@@ -245,7 +245,6 @@ io.on('connection', socket => {
   })
   // console.log('this is the object keys: ', Object.keys(io.sockets.sockets));
   socket.on('disconnect', () => {
-    console.log('user disconnected');
     io.emit('update user list');
   })
 })
