@@ -11,7 +11,7 @@ var PrivateUsers = require('./db/schema/PrivateUsers.js')
 var dataHandler = require('./db/data_handler.js')
 var http = require('http');
 var socketIo = require('socket.io');
-var port = 3000
+var port = process.env.PORT || 3000;
 
 var app = express()
 // app.locals['activeSocket'] = {}
