@@ -11,7 +11,7 @@ module.exports.createUser = (nI, cb) => {
   {replacements : [nI.email], type : sequelize.QueryTypes.SELECT})
   .then(userFound => {
     if (userFound.length > 0) {
-      cb('Email already registered, try logging in');
+      cb({invalid : true});
     } else {
       util.cipher(nI.password)
       .then(hashedPassword => {
@@ -70,14 +70,14 @@ module.exports.userLogin = (email, password, cb) => {
         if (match) {
           cb(false, {id : userFound[0].id, firstname: userFound[0].firstname});
         } else {
-          cb('Password/Email combination did not match');
+          cb({invalid : true});
         }
       })
       .catch(error => {
         cb(error);
       })
     } else {
-      cb('User not found');
+      cb({invalid : true});
     }
   })
   .catch(error => {

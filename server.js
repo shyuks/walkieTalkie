@@ -7,7 +7,6 @@ var Users = require('./db/schema/User.js')
 var ActiveUsers = require('./db/schema/ActiveUsers.js')
 var Interest = require('./db/schema/Interests.js')
 var UserInterests = require('./db/schema/UserInterests.js')
-var PrivateUsers = require('./db/schema/PrivateUsers.js')
 var dataHandler = require('./db/data_handler.js')
 var http = require('http');
 var socketIo = require('socket.io');
@@ -126,9 +125,11 @@ app.get('/findCommonUser', (req, res) => {
 
 app.post('/signup', (req, res) => {
   dataHandler.createUser(req.body, (error, result) => {
-    if (error) {
+    if (error.invalid) {
+      res.status(200).json(error);
+    } else if (error) {
       res.status(500).send(error);
-    } else {
+    }else {
       req.session.userId = result.id;
       req.session.userName = result.firstname;
       res.status(200).json(result);
@@ -138,9 +139,11 @@ app.post('/signup', (req, res) => {
 
 app.post('/login', (req, res) => {
   dataHandler.userLogin(req.body.email, req.body.password, (error, result) => {
-    if (error) {
+    if (error.invalid) {
+      res.status(200).json(error);
+    } else if (error) {
       res.status(500).send(error);
-    } else {
+    }else {
       req.session.userId = result.id;
       req.session.userName = result.firstname;
       res.status(200).json(result);

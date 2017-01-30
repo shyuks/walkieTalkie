@@ -5,7 +5,7 @@ class AvailableInterests extends Component {
   constructor(props){
     super(props)
     this.state = {
-      selected : this.props.checked?true:false
+      selected : (this.props.checked ? true : false)
     }
     this.handleCheck = this.handleCheck.bind(this);
   }

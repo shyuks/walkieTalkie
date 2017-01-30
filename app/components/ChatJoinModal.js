@@ -9,7 +9,6 @@ class ChatJoinModal extends Component {
     this.state = {
       show : true,
       stateMessage : null
-
     }
     this.handleClose = this.handleClose.bind(this);
     this.componentWillMount = this.componentWillMount.bind(this);
@@ -59,7 +58,7 @@ class ChatJoinModal extends Component {
             }</Modal.Body>) : (<div></div>)
         }
       <Modal.Footer>
-        <Button onClick={this.handleClose}>Start Chat</Button>
+        <Button bsStyle="primary" onClick={this.handleClose}>Start Chat</Button>
       </Modal.Footer>
     </Modal>
   )    
