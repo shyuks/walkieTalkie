@@ -112,6 +112,7 @@ class Chatroom extends Component {
   }
 
   componentDidUpdate() {
+    console.log('component updated');
     this.scrollToBottom();
   }
 
