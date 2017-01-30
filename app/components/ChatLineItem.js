@@ -16,33 +16,7 @@ class ChatLineItem extends Component {
   this.componentDidMount = this.componentDidMount.bind(this);
   }
 
-  componentDidMount() {
-    // axios.get('/getUserInterest', { params : {id : this.props.message.user}})
-    // .then(res => {
-    //   this.setState({
-    //     interests: res.data
-    //   })
-    // })
-    // .catch(err => {
-    //   console.log('error in getting users interest: ', err);
-    // })
-  }
-    
   render() {
-    // var addPopover = (
-    //   <Popover id="popover-trigger-click-root-close" title="User Interests">
-    //     {this.state.interests.map((interest, index) => {
-    //       return <ul key={index}><InterestsItem int={interest.Interest}/></ul>
-    //     })}
-    //     <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
-    //   </Popover>
-    // );
-    //     <div id='message'>
-    //   <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
-    //         <b>{this.props.message.from}</b>
-    //   </OverlayTrigger>: {this.props.message.body}
-    // </div>
-
     return (
       <div>
         <p><strong>{this.props.message.from}: </strong>{this.props.message.body}</p>
