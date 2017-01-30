@@ -40,7 +40,7 @@ app.get('/checkSession', (req, res) => {
 });
 
 app.get('/getActiveUsers', (req, res) => {
-  dataHandler.getActiveUsers(req.query.roomId, (error, result) => {
+  dataHandler.getActiveUsers(req.query.roomId, req.query.userId, (error, result) => {
     if (error) {
       res.status(500).send(error);
     } else {
@@ -202,6 +202,7 @@ io.on('connection', socket => {
   //listening for and joining room
   socket.on('join room', room => {
     console.log('joining room ', room);
+    socket.broadcast.to(room).emit('update user list');
     socket.join(room);
   })
 
@@ -232,6 +233,7 @@ io.on('connection', socket => {
   //listening for a request to leave current room
   socket.on('leaveRoom', room => {
     console.log("leaving room ", room);
+    socket.broadcast.to(room).emit('update user list');
     //leaving current room
     socket.leave(room);
   })
@@ -242,10 +244,10 @@ io.on('connection', socket => {
     socket.broadcast.to(pcData.sender).emit('declined', pcData)
   })
   // console.log('this is the object keys: ', Object.keys(io.sockets.sockets));
-  // socket.on('disconnect', () => {
-  //   console.log('this is this in disconnect: ', this)
-  //   console.log('this is the this.id in disconnect: ', this.id);
-  // })
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+    io.emit('update user list');
+  })
 })
 
 database.sync()

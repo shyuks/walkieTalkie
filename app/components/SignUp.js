@@ -77,8 +77,8 @@ class SignUp extends Component {
   }
 
   render(){
-    const signUpWellStyle={maxWidth: 500,margin: '0 auto 10px'};
-    const alertInstance = (
+    var signUpWellStyle={maxWidth: 500,margin: '0 auto 10px'};
+    var alertInstance = (
       <Alert className="loginSignupAlert" bsStyle="warning">
         Email already registered, try logging in
       </Alert>
