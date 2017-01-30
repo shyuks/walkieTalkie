@@ -21,6 +21,7 @@ class ChatSelection extends Component {
   }
 
 handleUserLocation(e, selection){
+  "use strict";
   e.preventDefault();
 
   this.setState({

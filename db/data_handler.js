@@ -1,3 +1,5 @@
+"use strict";
+
 let db = require('./config.js')
 let Users = require('./schema/User.js')
 let ActiveUsers = require('./schema/ActiveUsers.js');
@@ -166,7 +168,7 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
           cb(error);
         })
      } else {
-
+       "use strict";
        let roomsIds = [];
 
        res1.forEach(id => {roomsIds.push(id['roomId'])});
@@ -174,10 +176,12 @@ module.exports.findLocalRoom = (user, lat, long, cb) => {
         {replacements : [roomsIds], type : sequelize.QueryTypes.SELECT})
         .then(res4 => {
 
+          "use strict";
           let currDistance = 10000;
           let shortestPoint;
 
-          for(let i = 0; i <res4.length; i++){
+          for(var i = 0; i <res4.length; i++){
+            "use strict";
             let temp = util.distance(lat, long, res4[i]['latitude'], res4[i]['longitude']);
             if(temp < currDistance) {
               currDistance = temp;
@@ -255,7 +259,8 @@ module.exports.findCommonUser = (user, cb) => {
         db.query('select interestId from UserInterests where userId = ?',
         {replacements : [user], type : sequelize.QueryTypes.SELECT})
         .then(foundInterests => {
-
+          "use strict";
+          
           let roomsIds = [];
           let interestIds = [];
           res1.forEach(id => {roomsIds.push(id['roomId'])});
