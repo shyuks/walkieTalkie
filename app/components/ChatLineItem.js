@@ -29,20 +29,19 @@ class ChatLineItem extends Component {
   }
     
   render() {
-    var addPopover = (
-      <Popover id="popover-trigger-click-root-close" title="User Interests">
-        {this.state.interests.map((interest, index) => {
-          return <ul key={index}><InterestsItem int={interest.Interest}/></ul>
-        })}
-        <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
-      </Popover>
-    );
+    // var addPopover = (
+    //   <Popover id="popover-trigger-click-root-close" title="User Interests">
+    //     {this.state.interests.map((interest, index) => {
+    //       return <ul key={index}><InterestsItem int={interest.Interest}/></ul>
+    //     })}
+    //     <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
+    //   </Popover>
+    // );
 
     return (
     <div id='message'>
-      <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
-            <b>{this.props.message.from}</b>
-      </OverlayTrigger>: {this.props.message.body}
+            <h4>{this.props.message.from}</h4>
+            <p>{this.props.message.body}</p>
     </div>
 
     )

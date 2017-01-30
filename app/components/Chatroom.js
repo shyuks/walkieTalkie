@@ -253,7 +253,15 @@ class Chatroom extends Component {
                 <Row>
                   <Col xs={2} md={2}>
                     <div>
-                    <p>UserList</p>
+                      {
+                        this.state.roommates.map(user => {
+                          return <UserList 
+                                  key={users.id} 
+                                  user={user} 
+                                  privateChat={this.handlePrivateChat}
+                                  message={message}/>
+                        })
+                      }
                     </div>
                   </Col>
                   

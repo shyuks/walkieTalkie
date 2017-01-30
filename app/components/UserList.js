@@ -16,7 +16,7 @@ class UserList extends Component {
   }
 
   componentDidMount() {
-    axios.get('/getUserInterest', { params : {id : this.props.message.user}})
+    axios.get('/getUserInterest', { params : {id : this.props.user.id}})
     .then(res => {
       this.setState({
         interests: res.data
@@ -36,12 +36,12 @@ class UserList extends Component {
         <Button onClick={(e) => {this.props.privateChat(this.props.message.socketId, this.props.message.from)}}>Invite to Private Chat</Button>
       </Popover>
     );
-
+    console.log('rendering the userlist', this.props.user);
     return (
     <div>
     <OverlayTrigger trigger="click" rootClose placement="bottom" overlay={addPopover}>
-          <b>{this.props.message.from}</b>
-    </OverlayTrigger>: {this.props.message.body}
+          <b>{this.props.user.firstname}</b>
+    </OverlayTrigger>
     </div>
     )
   }

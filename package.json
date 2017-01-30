@@ -8,7 +8,7 @@
     "node": "7.2.1"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "webpack": "./node_modules/.bin/webpack -d --watch",
     "test": "mocha"
   },
